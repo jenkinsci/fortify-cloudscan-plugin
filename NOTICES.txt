@@ -1,0 +1,5 @@
+HP Fortify CloudScan Jenkins Plugin
+Copyright (c) Steve Springett. All Rights Reserved.
+
+HP Fortify and HP Fortify CloudScan
+Copyright (c) Hewlett-Packard. All Rights Reserved.
