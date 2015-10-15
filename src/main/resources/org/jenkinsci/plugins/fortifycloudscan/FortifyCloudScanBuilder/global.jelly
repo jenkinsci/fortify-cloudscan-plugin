@@ -19,17 +19,17 @@ limitations under the License.
     <f:section title="Fortify CloudScan">
 
         <f:entry title="${%exePath}" field="exePath"
-                 help="/plugin/dependency-check-jenkins-plugin/help-exepath.html">
+                 help="/plugin/fortify-cloudscan-jenkins-plugin/help-exepath.html">
             <f:textbox id="exePath"/>
         </f:entry>
 
         <f:entry title="${%sscUrl}" field="sscUrl"
-                 help="/plugin/dependency-check-jenkins-plugin/help-sscurl.html">
+                 help="/plugin/fortify-cloudscan-jenkins-plugin/help-sscurl.html">
             <f:textbox id="sscurl"/>
         </f:entry>
 
         <f:entry title="${%controllerUrl}" field="controllerUrl"
-                 help="/plugin/dependency-check-jenkins-plugin/help-controllerurl.html">
+                 help="/plugin/fortify-cloudscan-jenkins-plugin/help-controllerurl.html">
             <f:textbox id="controllerUrl"/>
         </f:entry>
 
