@@ -19,24 +19,23 @@ limitations under the License.
         <f:textbox id="buildId"/>
     </f:entry>
 
-    <f:entry title="${%useSsc}" description="" help="/plugin/fortify-cloudscan-jenkins-plugin/help-usessc.html">
-        <f:checkbox id="useSsc" name="isUseSsc" checked="${instance.isUseSsc()}"/>
-    </f:entry>
+    <f:optionalBlock name="useSsc" title="${%useSsc}" inline="true" checked="${instance.isUseSsc()}" help="/plugin/fortify-cloudscan-jenkins-plugin/help-usessc.html">
 
-    <f:entry title="${%sscToken}" description="" help="/plugin/fortify-cloudscan-jenkins-plugin/help-ssctoken.html">
-        <f:textbox id="sscToken"/>
-    </f:entry>
+        <f:entry title="${%sscToken}" description="" help="/plugin/fortify-cloudscan-jenkins-plugin/help-ssctoken.html">
+            <f:textbox id="sscToken"/>
+        </f:entry>
+        <f:entry title="${%upToken}" description="" help="/plugin/fortify-cloudscan-jenkins-plugin/help-uptoken.html">
+            <f:textbox id="upToken"/>
+        </f:entry>
 
-    <f:entry title="${%upToken}" description="" help="/plugin/fortify-cloudscan-jenkins-plugin/help-uptoken.html">
-        <f:textbox id="upToken"/>
-    </f:entry>
+        <f:entry title="${%versionId}" description="" help="/plugin/fortify-cloudscan-jenkins-plugin/help-versionid.html">
+            <f:textbox id="versionId"/>
+        </f:entry>
 
-    <f:entry title="${%versionId}" description="" help="/plugin/fortify-cloudscan-jenkins-plugin/help-versionid.html">
-        <f:textbox id="versionId"/>
-    </f:entry>
+        <f:entry title="${%scanArgs}" description="" help="/plugin/fortify-cloudscan-jenkins-plugin/help-scanargs.html">
+            <f:textbox id="scanArgs"/>
+        </f:entry>
 
-    <f:entry title="${%scanArgs}" description="" help="/plugin/fortify-cloudscan-jenkins-plugin/help-scanargs.html">
-        <f:textbox id="scanArgs"/>
-    </f:entry>
+    </f:optionalBlock>
 
 </j:jelly>
