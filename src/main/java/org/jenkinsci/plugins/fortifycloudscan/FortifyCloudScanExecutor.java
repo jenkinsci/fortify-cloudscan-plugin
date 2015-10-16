@@ -26,7 +26,7 @@ import java.io.Serializable;
  */
 public class FortifyCloudScanExecutor implements Serializable {
 
-    private static final long serialVersionUID = 4781360460201081295L;
+    private static final long serialVersionUID = 3595913479313812273L;
 
     private String args;
     private BuildListener listener;
