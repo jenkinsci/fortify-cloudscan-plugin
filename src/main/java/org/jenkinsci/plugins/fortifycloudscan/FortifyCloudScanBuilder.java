@@ -48,7 +48,7 @@ import java.net.URL;
 @SuppressWarnings("unused")
 public class FortifyCloudScanBuilder extends Builder implements Serializable {
 
-    private static final long serialVersionUID = 5594574614031769847L;
+    private static final long serialVersionUID = 5441945995905689815L;
 
     private final String buildId;
     private final Boolean useSsc;
