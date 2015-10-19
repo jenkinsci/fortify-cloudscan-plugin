@@ -17,6 +17,7 @@ package org.jenkinsci.plugins.fortifycloudscan;
 
 import hudson.model.BuildListener;
 
+import java.io.IOException;
 import java.io.Serializable;
 
 /**
@@ -43,14 +44,26 @@ public class FortifyCloudScanExecutor implements Serializable {
     }
 
     /**
-     * Performs a fortifycloudscan analysis build.
+     * Executes cloudscan with configured arguments
      *
-     * @return a boolean value indicating if the build was successful or not. A
-     * successful build is not determined by the ability to analyze dependencies,
-     * rather, simply to determine if errors were encountered during the execution.
+     * @return a boolean value indicating if the command was executed successfully or not.
      */
     public boolean perform() {
-        return false;
+        Process process;
+        try {
+            // Java exec requires that commands containing spaces be in an array
+            process = Runtime.getRuntime().exec(args);
+
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                return false;
+            }
+        } catch (InterruptedException e) {
+            log("Could not execute job: " + e.getMessage());
+        } catch (IOException e) {
+            log("Could not execute job: " + e.getMessage());
+        }
+        return true;
     }
 
     /**
