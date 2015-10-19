@@ -33,6 +33,10 @@ limitations under the License.
             <f:textbox id="controllerUrl"/>
         </f:entry>
 
+        <f:entry title="${%sscToken}" help="/plugin/fortify-cloudscan-jenkins-plugin/help-global-ssctoken.html">
+            <f:textbox id="sscToken"/>
+        </f:entry>
+
     </f:section>
 
 </j:jelly>
