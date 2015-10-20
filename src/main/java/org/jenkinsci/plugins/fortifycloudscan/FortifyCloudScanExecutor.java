@@ -17,8 +17,7 @@ package org.jenkinsci.plugins.fortifycloudscan;
 
 import hudson.model.BuildListener;
 
-import java.io.IOException;
-import java.io.Serializable;
+import java.io.*;
 
 /**
  * This class is called by the FortifyCloudScanBuilder (the Jenkins build-step plugin).
@@ -29,17 +28,17 @@ public class FortifyCloudScanExecutor implements Serializable {
 
     private static final long serialVersionUID = 3595913479313812273L;
 
-    private String args;
+    private String[] command;
     private BuildListener listener;
 
     /**
      * Constructs a new FortifyCloudScanExecutor object.
      *
-     * @param args Options to be used for execution
+     * @param command A String array of the command and options to use
      * @param listener BuildListener object to interact with the current build
      */
-    public FortifyCloudScanExecutor(String args, BuildListener listener) {
-        this.args = args;
+    public FortifyCloudScanExecutor(String[] command, BuildListener listener) {
+        this.command = command;
         this.listener = listener;
     }
 
@@ -49,10 +48,23 @@ public class FortifyCloudScanExecutor implements Serializable {
      * @return a boolean value indicating if the command was executed successfully or not.
      */
     public boolean perform() {
+        String[] versionCommand = {command[0], "-version"};
+        execute(versionCommand);
+        logCommand();
+        return execute(command);
+    }
+
+    private boolean execute(String[] command) {
         Process process;
         try {
             // Java exec requires that commands containing spaces be in an array
-            process = Runtime.getRuntime().exec(args);
+            process = Runtime.getRuntime().exec(command);
+
+            // Redirect error and output to console
+            StreamLogger erroutLogger = new StreamLogger(process.getErrorStream());
+            StreamLogger stdoutLogger = new StreamLogger(process.getInputStream());
+            erroutLogger.start();
+            stdoutLogger.start();
 
             int exitCode = process.waitFor();
             if (exitCode != 0) {
@@ -70,8 +82,40 @@ public class FortifyCloudScanExecutor implements Serializable {
      * Log messages to the builds console.
      * @param message The message to log
      */
-    private void log(String message) {
+    protected void log(String message) {
         final String outtag = "[" + FortifyCloudScanPlugin.PLUGIN_NAME + "] ";
         listener.getLogger().println(outtag + message.replaceAll("\\n", "\n" + outtag));
     }
+
+    private void logCommand() {
+        String cmd ="Executing: ";
+        for (String param : command) {
+            cmd = cmd + param + " ";
+        }
+        log(cmd);
+    }
+
+    private class StreamLogger extends Thread {
+        InputStream is;
+
+        private StreamLogger(InputStream is) {
+            this.is = is;
+        }
+
+        @Override
+        public void run() {
+            try {
+                InputStreamReader isr = new InputStreamReader(is);
+                BufferedReader br = new BufferedReader(isr);
+                String line;
+                while ((line = br.readLine()) != null) {
+                    log(line);
+                }
+            }
+            catch (IOException ioe) {
+                ioe.printStackTrace();
+            }
+        }
+    }
+
 }
