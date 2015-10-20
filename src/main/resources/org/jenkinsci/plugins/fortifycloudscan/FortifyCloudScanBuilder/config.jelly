@@ -18,24 +18,84 @@ limitations under the License.
     <f:entry title="${%buildId}" field="buildId" help="/plugin/fortify-cloudscan-jenkins-plugin/help-buildid.html">
         <f:textbox id="buildId"/>
     </f:entry>
+    <f:entry title="${%xmx}" field="xmx" help="/plugin/fortify-cloudscan-jenkins-plugin/help-xmx.html">
+        <f:textbox id="xmx"/>
+    </f:entry>
 
-    <f:optionalBlock name="useSsc" title="${%useSsc}" inline="true" checked="${instance.isUseSsc()}" help="/plugin/fortify-cloudscan-jenkins-plugin/help-usessc.html">
+    <f:entry title="Tags" help="/plugin/fortify-cloudscan-jenkins-plugin/help-optional-build.html">
+        <table>
+            <tbody>
+                <tr>
+                    <td width="30"/>
+                    <td style="vertical-align: middle;">${%buildLabel}</td>
+                    <td><f:textbox id="buildLabel" name="buildLabel" value="${instance.getBuildLabel()}"/></td>
+                    <td width="20"/>
+                    <td style="vertical-align: middle;">${%buildProject}</td>
+                    <td><f:textbox id="buildProject" name="buildProject" value="${instance.getBuildProject()}"/></td>
+                    <td width="20"/>
+                    <td style="vertical-align: middle;">${%buildVersion}</td>
+                    <td><f:textbox id="buildVersion" name="buildVersion" value="${instance.getBuildVersion()}"/></td>
+                </tr>
+            </tbody>
+        </table>
+    </f:entry>
 
-        <f:entry title="${%sscToken}" description="" help="/plugin/fortify-cloudscan-jenkins-plugin/help-ssctoken.html">
+    <f:optionalBlock name="useSsc" title="${%useSsc}" inline="true" checked="${instance.getUseSsc()}" help="/plugin/fortify-cloudscan-jenkins-plugin/help-usessc.html">
+        <f:entry title="${%sscToken}" field="sscToken" help="/plugin/fortify-cloudscan-jenkins-plugin/help-ssctoken.html">
             <f:textbox id="sscToken"/>
         </f:entry>
-        <f:entry title="${%upToken}" description="" help="/plugin/fortify-cloudscan-jenkins-plugin/help-uptoken.html">
+        <f:entry title="${%upToken}" field="upToken" help="/plugin/fortify-cloudscan-jenkins-plugin/help-uptoken.html">
             <f:textbox id="upToken"/>
         </f:entry>
 
-        <f:entry title="${%versionId}" description="" help="/plugin/fortify-cloudscan-jenkins-plugin/help-versionid.html">
+        <f:entry title="${%versionId}" field="versionId" help="/plugin/fortify-cloudscan-jenkins-plugin/help-versionid.html">
             <f:textbox id="versionId"/>
         </f:entry>
+    </f:optionalBlock>
 
-        <f:entry title="${%scanArgs}" description="" help="/plugin/fortify-cloudscan-jenkins-plugin/help-scanargs.html">
+    <f:advanced>
+        <f:entry title="${%scanArgs}" field="scanArgs" help="/plugin/fortify-cloudscan-jenkins-plugin/help-scanargs.html">
             <f:textbox id="scanArgs"/>
         </f:entry>
-
-    </f:optionalBlock>
+        <f:entry title="${%disableDefaultRuleType}" field="disableDefaultRuleType" help="/plugin/fortify-cloudscan-jenkins-plugin/help-disable-default-rule-type.html">
+            <f:textbox id="disableDefaultRuleType"/>
+        </f:entry>
+        <f:entry title="${%encoding}" field="encoding" help="/plugin/fortify-cloudscan-jenkins-plugin/help-encoding.html">
+            <f:textbox id="encoding"/>
+        </f:entry>
+        <f:entry title="${%filter}" field="filter" help="/plugin/fortify-cloudscan-jenkins-plugin/help-filter.html">
+            <f:textbox id="filter"/>
+        </f:entry>
+        <f:entry title="${%noDefaultIssueRules}" description="" help="/plugin/fortify-cloudscan-jenkins-plugin/help-no-default-issue-rules.html">
+            <f:checkbox id="noDefaultIssueRules" name="noDefaultIssueRules" checked="${instance.getNoDefaultIssueRules()}"/>
+        </f:entry>
+        <f:entry title="${%noDefaultRules}" description="" help="/plugin/fortify-cloudscan-jenkins-plugin/help-no-default-rules.html">
+            <f:checkbox id="noDefaultRules" name="noDefaultRules" checked="${instance.getNoDefaultRules()}"/>
+        </f:entry>
+        <f:entry title="${%noDefaultSourceRules}" description="" help="/plugin/fortify-cloudscan-jenkins-plugin/help-no-default-source-rules.html">
+            <f:checkbox id="noDefaultSourceRules" name="noDefaultSourceRules" checked="${instance.getNoDefaultSourceRules()}"/>
+        </f:entry>
+        <f:entry title="${%noDefaultSinkRules}" description="" help="/plugin/fortify-cloudscan-jenkins-plugin/help-no-default-sink-rules.html">
+            <f:checkbox id="noDefaultSinkRules" name="noDefaultSinkRules" checked="${instance.getNoDefaultSinkRules()}"/>
+        </f:entry>
+        <f:entry title="${%disableSourceRendering}" description="" help="/plugin/fortify-cloudscan-jenkins-plugin/help-disable-source-rendering.html">
+            <f:checkbox id="disableSourceRendering" name="disableSourceRendering" checked="${instance.getDisableSourceRendering()}"/>
+        </f:entry>
+        <f:entry title="${%quick}" description="" help="/plugin/fortify-cloudscan-jenkins-plugin/help-quick.html">
+            <f:checkbox id="quick" name="quick" checked="${instance.getQuick()}"/>
+        </f:entry>
+        <f:entry title="${%rules}" field="rules" help="/plugin/fortify-cloudscan-jenkins-plugin/help-rules.html">
+            <f:textbox id="rules"/>
+        </f:entry>
+        <f:entry title="${%workers}" field="workers" help="/plugin/fortify-cloudscan-jenkins-plugin/help-workers.html">
+            <f:textbox id="workers"/>
+        </f:entry>
+        <f:entry title="${%rmiWorkerMaxHeap}" field="rmiWorkerMaxHeap" help="/plugin/fortify-cloudscan-jenkins-plugin/help-rmi-worker-max-heap.html">
+            <f:textbox id="rmiWorkerMaxHeap"/>
+        </f:entry>
+        <f:entry title="${%threadCount}" field="threadCount" help="/plugin/fortify-cloudscan-jenkins-plugin/help-thread-count.html">
+            <f:textbox id="threadCount"/>
+        </f:entry>
+    </f:advanced>
 
 </j:jelly>
