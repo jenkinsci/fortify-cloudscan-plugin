@@ -54,29 +54,11 @@ limitations under the License.
     </f:optionalBlock>
 
     <f:advanced>
-        <f:entry title="${%scanArgs}" field="scanArgs" help="/plugin/fortify-cloudscan-jenkins-plugin/help-scanargs.html">
-            <f:textbox id="scanArgs"/>
-        </f:entry>
-        <f:entry title="${%disableDefaultRuleType}" field="disableDefaultRuleType" help="/plugin/fortify-cloudscan-jenkins-plugin/help-disable-default-rule-type.html">
-            <f:textbox id="disableDefaultRuleType"/>
-        </f:entry>
-        <f:entry title="${%encoding}" field="encoding" help="/plugin/fortify-cloudscan-jenkins-plugin/help-encoding.html">
-            <f:textbox id="encoding"/>
-        </f:entry>
         <f:entry title="${%filter}" field="filter" help="/plugin/fortify-cloudscan-jenkins-plugin/help-filter.html">
             <f:textbox id="filter"/>
         </f:entry>
-        <f:entry title="${%noDefaultIssueRules}" description="" help="/plugin/fortify-cloudscan-jenkins-plugin/help-no-default-issue-rules.html">
-            <f:checkbox id="noDefaultIssueRules" name="noDefaultIssueRules" checked="${instance.getNoDefaultIssueRules()}"/>
-        </f:entry>
         <f:entry title="${%noDefaultRules}" description="" help="/plugin/fortify-cloudscan-jenkins-plugin/help-no-default-rules.html">
             <f:checkbox id="noDefaultRules" name="noDefaultRules" checked="${instance.getNoDefaultRules()}"/>
-        </f:entry>
-        <f:entry title="${%noDefaultSourceRules}" description="" help="/plugin/fortify-cloudscan-jenkins-plugin/help-no-default-source-rules.html">
-            <f:checkbox id="noDefaultSourceRules" name="noDefaultSourceRules" checked="${instance.getNoDefaultSourceRules()}"/>
-        </f:entry>
-        <f:entry title="${%noDefaultSinkRules}" description="" help="/plugin/fortify-cloudscan-jenkins-plugin/help-no-default-sink-rules.html">
-            <f:checkbox id="noDefaultSinkRules" name="noDefaultSinkRules" checked="${instance.getNoDefaultSinkRules()}"/>
         </f:entry>
         <f:entry title="${%disableSourceRendering}" description="" help="/plugin/fortify-cloudscan-jenkins-plugin/help-disable-source-rendering.html">
             <f:checkbox id="disableSourceRendering" name="disableSourceRendering" checked="${instance.getDisableSourceRendering()}"/>
@@ -90,11 +72,8 @@ limitations under the License.
         <f:entry title="${%workers}" field="workers" help="/plugin/fortify-cloudscan-jenkins-plugin/help-workers.html">
             <f:textbox id="workers"/>
         </f:entry>
-        <f:entry title="${%rmiWorkerMaxHeap}" field="rmiWorkerMaxHeap" help="/plugin/fortify-cloudscan-jenkins-plugin/help-rmi-worker-max-heap.html">
-            <f:textbox id="rmiWorkerMaxHeap"/>
-        </f:entry>
-        <f:entry title="${%threadCount}" field="threadCount" help="/plugin/fortify-cloudscan-jenkins-plugin/help-thread-count.html">
-            <f:textbox id="threadCount"/>
+        <f:entry title="${%scanArgs}" field="scanArgs" help="/plugin/fortify-cloudscan-jenkins-plugin/help-scanargs.html">
+            <f:textarea id="scanArgs"/>
         </f:entry>
     </f:advanced>
 

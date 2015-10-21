@@ -1,0 +1,3 @@
+<div>
+    Puts SCA into parallel analysis mode. The ideal number of worker processes is n‐2, where n represents the number of processors in your machine. For example, if your machine has 8 processors, the ideal number of worker processes would be 6. There is a single master process that coordinates tasks and the distribution of data to the data workers. Each Java process uses the same amount of memory (unless you overrode it using the com.fortify.sca.RmiWorkerMaxHeapMB in the fortify-sca.properties file). You may need to balance the max heap and worker options to insure you don’t allocate more memory than is physically available.
+</div>
