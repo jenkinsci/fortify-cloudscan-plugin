@@ -255,7 +255,7 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
         List<String> command = new ArrayList<String>();
 
         // Check if the path to the cloudscan executable was specified
-        String exePath = this.getDescriptor().getExePath();
+        String exePath = substituteVariable(build, listener, this.getDescriptor().getExePath());
         if (StringUtils.isNotBlank(exePath)) {
             command.add(exePath);
         } else {
@@ -263,30 +263,30 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
             command.add("cloudscan");
         }
         if (useSsc) {
-            append(command, this.getDescriptor().getSscUrl(), "-sscurl");
-            append(command, sscToken, "-ssctoken");
+            append(command, substituteVariable(build, listener, this.getDescriptor().getSscUrl()), "-sscurl");
+            append(command, substituteVariable(build, listener, sscToken), "-ssctoken");
             append(command, null, "start");
             append(command, null, "-upload");
-            append(command, versionId, "-versionid");
-            append(command, upToken, "-uptoken");
+            append(command, substituteVariable(build, listener, versionId), "-versionid");
+            append(command, substituteVariable(build, listener, upToken), "-uptoken");
         } else {
-            append(command, this.getDescriptor().getControllerUrl(), "-url");
+            append(command, substituteVariable(build, listener, this.getDescriptor().getControllerUrl()), "-url");
             append(command, null, "start");
         }
-        append(command, buildId, "-b");
+        append(command, substituteVariable(build, listener, buildId), "-b");
         append(command, null, "-scan");
         // Everthing appearing after -scan are parameters specific to sourceanalyzer
-        append(command, xmx, "-Xmx");
-        append(command, buildLabel, "-build-label");
-        append(command, buildProject, "-build-project");
-        append(command, buildVersion, "-build-version");
-        append(command, scanArgs, scanArgs);
-        append(command, filter, "-filter");
+        append(command, substituteVariable(build, listener, xmx), "-Xmx");
+        append(command, substituteVariable(build, listener, buildLabel), "-build-label");
+        append(command, substituteVariable(build, listener, buildProject), "-build-project");
+        append(command, substituteVariable(build, listener, buildVersion), "-build-version");
+        append(command, substituteVariable(build, listener, scanArgs), scanArgs);
+        append(command, substituteVariable(build, listener, filter), "-filter");
         append(command, noDefaultRules, "-no-default-rules");
         append(command, disableSourceRendering, "-disable-source-rendering");
         append(command, quick, "-quick");
-        append(command, rules, "-rules");
-        append(command, workers, "-j");
+        append(command, substituteVariable(build, listener, rules), "-rules");
+        append(command, substituteVariable(build, listener, workers), "-j");
 
         Object[] objectList = command.toArray();
         return Arrays.copyOf(objectList, objectList.length, String[].class);
