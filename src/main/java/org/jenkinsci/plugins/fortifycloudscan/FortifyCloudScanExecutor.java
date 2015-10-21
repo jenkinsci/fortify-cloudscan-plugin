@@ -17,7 +17,11 @@ package org.jenkinsci.plugins.fortifycloudscan;
 
 import hudson.model.BuildListener;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Serializable;
 
 /**
  * This class is called by the FortifyCloudScanBuilder (the Jenkins build-step plugin).
