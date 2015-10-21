@@ -71,9 +71,9 @@ public class FortifyCloudScanExecutor implements Serializable {
                 return false;
             }
         } catch (InterruptedException e) {
-            log("Could not execute job: " + e.getMessage());
+            log(Messages.Executor_Failure() + ": " + e.getMessage());
         } catch (IOException e) {
-            log("Could not execute job: " + e.getMessage());
+            log(Messages.Executor_Failure() + ": " + e.getMessage());
         }
         return true;
     }
@@ -88,7 +88,7 @@ public class FortifyCloudScanExecutor implements Serializable {
     }
 
     private void logCommand() {
-        String cmd ="Executing: ";
+        String cmd = Messages.Executor_Display_Options() + ": ";
         for (String param : command) {
             cmd = cmd + param + " ";
         }
