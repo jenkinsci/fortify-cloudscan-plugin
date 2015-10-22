@@ -50,11 +50,6 @@
             <artifactId>xmlbeans</artifactId>
             <version>2.6.0</version>
         </dependency>
-        <dependency>
-            <groupId>xmlbeans</groupId>
-            <artifactId>xbean</artifactId>
-            <version>2.2.0</version>
-        </dependency>
     </dependencies>
 
     <build>
