@@ -24,7 +24,8 @@ import java.io.InputStreamReader;
 import java.io.Serializable;
 
 /**
- * This class is called by the FortifyCloudScanBuilder (the Jenkins build-step plugin).
+ * This class is called by FortifyCloudScanBuilder (the Jenkins build-step plugin).
+ * Performs the external execution of the cloudscan command line interface.
  *
  * @author Steve Springett (steve.springett@owasp.org)
  */
@@ -58,6 +59,9 @@ public class FortifyCloudScanExecutor implements Serializable {
         return execute(command);
     }
 
+    /**
+     * Executes the external cloudscan process sending stderr and stdout to the logger
+     */
     private boolean execute(String[] command) {
         Process process;
         try {

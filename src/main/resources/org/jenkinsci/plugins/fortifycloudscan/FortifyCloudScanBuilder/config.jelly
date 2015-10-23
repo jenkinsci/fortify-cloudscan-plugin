@@ -47,9 +47,16 @@ limitations under the License.
         <f:entry title="${%upToken}" field="upToken" help="/plugin/fortify-cloudscan-jenkins-plugin/help-uptoken.html">
             <f:textbox id="upToken"/>
         </f:entry>
-
         <f:entry title="${%versionId}" field="versionId" help="/plugin/fortify-cloudscan-jenkins-plugin/help-versionid.html">
             <f:textbox id="versionId"/>
+        </f:entry>
+        <f:entry title="${%project}" field="project" help="/plugin/fortify-cloudscan-jenkins-plugin/help-project.html">
+            <f:select id="project" onchange="displayRefreshing()">
+                <f:option selected="true" value="">---- ${%select} ----</f:option>
+            </f:select>
+        </f:entry>
+        <f:entry title="${%version}" field="projectVersion" help="/plugin/fortify-cloudscan-jenkins-plugin/help-projectversion.html">
+            <f:select id="projectVersion" onchange="updateVersionId()"/>
         </f:entry>
     </f:optionalBlock>
 
@@ -76,5 +83,16 @@ limitations under the License.
             <f:textarea id="scanArgs"/>
         </f:entry>
     </f:advanced>
+
+    <script type="text/javascript">
+        function displayRefreshing() {
+            document.getElementById('projectVersion').value = "";
+            document.getElementById('projectVersion').options[0].text = "---- refreshing ----";
+            document.getElementById('projectVersion').selectedIndex = 0;
+        }
+        function updateVersionId() {
+            document.getElementById('versionId').value = document.getElementById('projectVersion').value;
+        }
+    </script>
 
 </j:jelly>
