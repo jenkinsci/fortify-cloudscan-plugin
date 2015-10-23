@@ -75,15 +75,13 @@ public class FortifyCloudScanExecutor implements Serializable {
             stdoutLogger.start();
 
             int exitCode = process.waitFor();
-            if (exitCode != 0) {
-                return false;
-            }
+            return exitCode == 0;
         } catch (InterruptedException e) {
             log(Messages.Executor_Failure() + ": " + e.getMessage());
         } catch (IOException e) {
             log(Messages.Executor_Failure() + ": " + e.getMessage());
         }
-        return true;
+        return false;
     }
 
     /**
