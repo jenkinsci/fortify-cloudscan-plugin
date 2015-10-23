@@ -15,6 +15,8 @@
  */
 package org.jenkinsci.plugins.fortifycloudscan;
 
+import com.fortifysoftware.schema.wsTypes.Project;
+import com.fortifysoftware.schema.wsTypes.ProjectVersionLite;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -24,6 +26,7 @@ import hudson.model.BuildListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
 import jenkins.security.MasterToSlaveCallable;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
@@ -231,18 +234,18 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
      * @param listener A BuildListener object
      * @return A true or false value indicating if the build was successful or if it failed
      */
-   @Override
+    @Override
     public boolean perform(final AbstractBuild build, final Launcher launcher, final BuildListener listener)
             throws InterruptedException, IOException {
 
-       final String[] args = generateArgs(build, listener);
+        final String[] args = generateArgs(build, listener);
 
-       return launcher.getChannel().call(new MasterToSlaveCallable<Boolean, IOException>() {
-           public Boolean call() throws IOException {
-               final FortifyCloudScanExecutor executor = new FortifyCloudScanExecutor(args, listener);
-               return executor.perform();
-           }
-       });
+        return launcher.getChannel().call(new MasterToSlaveCallable<Boolean, IOException>() {
+            public Boolean call() throws IOException {
+                final FortifyCloudScanExecutor executor = new FortifyCloudScanExecutor(args, listener);
+                return executor.perform();
+            }
+        });
     }
 
     /**
@@ -347,6 +350,11 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
          */
         private String controllerUrl;
 
+        /**
+         * Specifies the global SSC token
+         */
+        private String globalSscToken;
+
 
         public DescriptorImpl() {
             super(FortifyCloudScanBuilder.class);
@@ -354,7 +362,7 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
         }
 
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
-            // Indicates that this builder can be used with all kinds of project types 
+            // Indicates that this builder can be used with all kinds of project types
             return true;
         }
 
@@ -413,6 +421,55 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
         }
 
         /**
+         * Performs a lookup of all Projects defined in SSC.
+         * @return a ListBoxModel which will be rendered in the select dropdown.
+         */
+        public ListBoxModel doFillProjectItems() {
+            if (StringUtils.isBlank(this.sscUrl) || StringUtils.isBlank(this.globalSscToken)) {
+                return null;
+            }
+            ListBoxModel m = new ListBoxModel();
+            try {
+                FortifySsc ssc = new FortifySsc(new URL(this.sscUrl + "/fm-ws/services"), this.globalSscToken);
+                List<Project> projects = ssc.getProjects();
+                m.add("---- " + Messages.select() + " ---- ", "");
+                for (Project project : projects) {
+                    m.add(project.getName(), String.valueOf(project.getId()));
+                }
+            } catch (Exception e) {
+                m.add(Messages.sscfailure(), e.getMessage());
+            }
+            return m;
+        }
+
+        /**
+         * Performs a lookup of all Versions for the specified Project.
+         * @param project The ID of the Project to lookup
+         * @return a ListBoxModel which will be rendered in the select dropdown.
+         */
+        public ListBoxModel doFillProjectVersionItems(@QueryParameter String project) {
+            if (StringUtils.isBlank(this.sscUrl) || StringUtils.isBlank(this.globalSscToken)) {
+                return null;
+            }
+            ListBoxModel m = new ListBoxModel();
+            if (project == null || project.equals("")) {
+                m.add("", "");
+                return m;
+            }
+            try {
+                FortifySsc ssc = new FortifySsc(new URL(this.sscUrl + "/fm-ws/services"), this.globalSscToken);
+                List<ProjectVersionLite> projectVersions = ssc.getActiveProjectVersions(Long.valueOf(project));
+                m.add("---- " + Messages.select() + " ---- ", "");
+                for (ProjectVersionLite projectVersion : projectVersions) {
+                    m.add(projectVersion.getName(), String.valueOf(projectVersion.getId()));
+                }
+            } catch (Exception e) {
+                m.add(Messages.sscfailure(), e.getMessage());
+            }
+            return m;
+        }
+
+        /**
          * Takes the /apply/save step in the global config and saves the JSON data.
          * @param req the request
          * @param formData the form data
@@ -422,8 +479,9 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
         @Override
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
             exePath = formData.getString("exePath");
-            sscUrl = formData.getString("sscUrl");
-            controllerUrl = formData.getString("controllerUrl");
+            sscUrl = formData.getString("sscUrl").replaceAll("/$", ""); // remove trailing slash if present
+            controllerUrl = formData.getString("controllerUrl").replaceAll("/$", ""); // remove trailing slash if present
+            globalSscToken = formData.getString("globalSscToken");
             save();
             return super.configure(req, formData);
         }
@@ -447,6 +505,13 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
          */
         public String getControllerUrl() {
             return controllerUrl;
+        }
+
+        /**
+         * Returns the global SSC token.
+         */
+        public String getGlobalSscToken() {
+            return globalSscToken;
         }
     }
 
