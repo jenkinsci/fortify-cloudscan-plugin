@@ -279,7 +279,7 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
         append(command, substituteVariable(build, listener, buildId), "-b");
         append(command, null, "-scan");
         // Everthing appearing after -scan are parameters specific to sourceanalyzer
-        append(command, substituteVariable(build, listener, xmx), "-Xmx");
+        append(command, substituteVariable(build, listener, xmx), "-Xmx", true);
         append(command, substituteVariable(build, listener, buildLabel), "-build-label");
         append(command, substituteVariable(build, listener, buildProject), "-build-project");
         append(command, substituteVariable(build, listener, buildVersion), "-build-version");
@@ -295,18 +295,27 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
         return Arrays.copyOf(objectList, objectList.length, String[].class);
     }
 
+
+    private void append(List<String> command, Object confItem, String arg) {
+        append(command, confItem, arg, false);
+    }
+
     /**
      * Add arguments to the stack based on the type of parameter being added.
      */
-    private void append(List<String> command, Object confItem, String arg) {
+    private void append(List<String> command, Object confItem, String arg, boolean concat) {
         if (confItem == null && arg != null) {
             command.add(arg);
         }
         if (confItem instanceof String) {
             String value = (String)confItem;
             if (StringUtils.isNotBlank(value)) {
-                command.add(arg);
-                command.add(value);
+                if (concat) {
+                    command.add(arg + value);
+                } else {
+                    command.add(arg);
+                    command.add(value);
+                }
             }
         } else if (confItem instanceof Boolean) {
             boolean value = (Boolean)confItem;
