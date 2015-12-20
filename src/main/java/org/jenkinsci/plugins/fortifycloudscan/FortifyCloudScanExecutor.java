@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * This class is called by FortifyCloudScanBuilder (the Jenkins build-step plugin).
@@ -33,17 +34,14 @@ public class FortifyCloudScanExecutor implements Serializable {
 
     private static final long serialVersionUID = 3595913479313812273L;
 
-    private String[] command;
     private BuildListener listener;
 
     /**
      * Constructs a new FortifyCloudScanExecutor object.
      *
-     * @param command A String array of the command and options to use
      * @param listener BuildListener object to interact with the current build
      */
-    public FortifyCloudScanExecutor(String[] command, BuildListener listener) {
-        this.command = command;
+    public FortifyCloudScanExecutor(BuildListener listener) {
         this.listener = listener;
     }
 
@@ -52,21 +50,21 @@ public class FortifyCloudScanExecutor implements Serializable {
      *
      * @return a boolean value indicating if the command was executed successfully or not.
      */
-    public boolean perform() {
+    public boolean perform(Map envVars, String[] command) {
         String[] versionCommand = {command[0], "-version"};
-        execute(versionCommand);
-        logCommand();
-        return execute(command);
+        execute(envVars, versionCommand);
+        logCommand(versionCommand);
+        return execute(envVars, command);
     }
 
     /**
      * Executes the external cloudscan process sending stderr and stdout to the logger
      */
-    private boolean execute(String[] command) {
-        Process process;
+    private boolean execute(Map envVars, String[] command) {
+        ProcessBuilder pb = new ProcessBuilder(command);
+        pb.environment().putAll(envVars);
         try {
-            // Java exec requires that commands containing spaces be in an array
-            process = Runtime.getRuntime().exec(command);
+            Process process = pb.start();
 
             // Redirect error and output to console
             StreamLogger erroutLogger = new StreamLogger(process.getErrorStream());
@@ -93,7 +91,7 @@ public class FortifyCloudScanExecutor implements Serializable {
         listener.getLogger().println(outtag + message.replaceAll("\\n", "\n" + outtag));
     }
 
-    private void logCommand() {
+    private void logCommand(String[] command) {
         String cmd = Messages.Executor_Display_Options() + ": ";
         for (String param : command) {
             cmd = cmd + param + " ";
