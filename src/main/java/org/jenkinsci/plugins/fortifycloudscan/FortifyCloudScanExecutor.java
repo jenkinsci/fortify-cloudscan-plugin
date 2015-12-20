@@ -66,11 +66,8 @@ public class FortifyCloudScanExecutor implements Serializable {
         try {
             Process process = pb.start();
 
-            // Redirect error and output to console
-            StreamLogger erroutLogger = new StreamLogger(process.getErrorStream());
-            StreamLogger stdoutLogger = new StreamLogger(process.getInputStream());
-            erroutLogger.start();
-            stdoutLogger.start();
+            new StreamLogger(process.getErrorStream()).start();
+            new StreamLogger(process.getInputStream()).start();
 
             int exitCode = process.waitFor();
             return exitCode == 0;
