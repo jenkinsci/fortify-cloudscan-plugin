@@ -17,6 +17,7 @@ package org.jenkinsci.plugins.fortifycloudscan;
 
 import com.fortifysoftware.schema.wsTypes.Project;
 import com.fortifysoftware.schema.wsTypes.ProjectVersionLite;
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -238,12 +239,13 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
     public boolean perform(final AbstractBuild build, final Launcher launcher, final BuildListener listener)
             throws InterruptedException, IOException {
 
+        final EnvVars env = build.getEnvironment(listener);
         final String[] args = generateArgs(build, listener);
 
         return launcher.getChannel().call(new MasterToSlaveCallable<Boolean, IOException>() {
             public Boolean call() throws IOException {
-                final FortifyCloudScanExecutor executor = new FortifyCloudScanExecutor(args, listener);
-                return executor.perform();
+                final FortifyCloudScanExecutor executor = new FortifyCloudScanExecutor(listener);
+                return executor.perform(env, args);
             }
         });
     }
