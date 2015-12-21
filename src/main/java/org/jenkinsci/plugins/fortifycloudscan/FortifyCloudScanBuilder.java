@@ -43,6 +43,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * The fortifycloudscan builder class provides the ability to invoke a fortifycloudscan build as
@@ -366,6 +367,12 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
          */
         private String globalSscToken;
 
+        /**
+         * Precompiled RegEx validation patterns
+         */
+        private static final Pattern PATTERN_VERSION_ID = Pattern.compile("^[0-9]{5}?$");
+        private static final Pattern PATTERN_UUID = Pattern.compile("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$");
+        private static final Pattern PATTERN_MEMORY = Pattern.compile("^[0-9]*(g|G|m|M)$");
 
         public DescriptorImpl() {
             super(FortifyCloudScanBuilder.class);
@@ -385,15 +392,15 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
         }
 
         public FormValidation doCheckSscUrl(@QueryParameter String value) {
-            return doCheckUrl(value);
+            return checkUrl(value);
         }
 
         public FormValidation doCheckControllerUrl(@QueryParameter String value) {
-            return doCheckUrl(value);
+            return checkUrl(value);
         }
 
         public FormValidation doCheckExePath(@QueryParameter String value) {
-            return doCheckPath(value);
+            return checkPath(value);
         }
 
         /**
@@ -401,7 +408,7 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
          * @param value The value of the URL as specified in the global config
          * @return a FormValidation object
          */
-        private FormValidation doCheckUrl(@QueryParameter String value) {
+        private FormValidation checkUrl(String value) {
             if (StringUtils.isBlank(value)) {
                 return FormValidation.ok();
             }
@@ -418,7 +425,7 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
          * @param value The value of the path as specified in the global config
          * @return a FormValidation object
          */
-        private FormValidation doCheckPath(@QueryParameter String value) {
+        private FormValidation checkPath(String value) {
             if (StringUtils.isBlank(value)) {
                 return FormValidation.ok();
             }
@@ -429,6 +436,38 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
                 return FormValidation.error("The specified value is not a valid path");
             }
             return FormValidation.ok();
+        }
+
+        public FormValidation doCheckXmx(@QueryParameter String value) {
+            if (PATTERN_MEMORY.matcher(value).matches()) {
+                return FormValidation.ok();
+            } else {
+                return FormValidation.error("Xmx is not in the correct format.");
+            }
+        }
+
+        public FormValidation doCheckUpToken(@QueryParameter String value) {
+            return checkToken(value);
+        }
+
+        public FormValidation doCheckSscToken(@QueryParameter String value) {
+            return checkToken(value);
+        }
+
+        private FormValidation checkToken(String value) {
+            if (PATTERN_UUID.matcher(value).matches()) {
+                return FormValidation.ok();
+            } else {
+                return FormValidation.error("Token is not in the correct format.");
+            }
+        }
+
+        public FormValidation doCheckVersionId(@QueryParameter String value) {
+            if (PATTERN_VERSION_ID.matcher(value).matches()) {
+                return FormValidation.ok();
+            } else {
+                return FormValidation.error("Project Version ID not in the correct format.");
+            }
         }
 
         /**
