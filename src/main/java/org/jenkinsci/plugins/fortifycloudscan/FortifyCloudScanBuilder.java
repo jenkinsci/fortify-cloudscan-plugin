@@ -71,6 +71,7 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
     private final String filter;
     private final boolean noDefaultRules;
     private final boolean disableSourceRendering;
+    private final boolean disableSnippets;
     private final boolean quick;
     private final String rules;
     private final String workers;
@@ -80,7 +81,8 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
     public FortifyCloudScanBuilder(String buildId, String xmx, String buildLabel, String buildProject,
                                    String buildVersion, Boolean useSsc, String sscToken, String upToken,
                                    String versionId, String scanArgs, String filter, Boolean noDefaultRules,
-                                   Boolean disableSourceRendering, Boolean quick, String rules, String workers) {
+                                   Boolean disableSourceRendering, Boolean disableSnippets, Boolean quick,
+                                   String rules, String workers) {
 
         this.buildId = buildId;
         this.xmx = xmx;
@@ -95,6 +97,7 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
         this.filter = filter;
         this.noDefaultRules = (noDefaultRules != null) && noDefaultRules;
         this.disableSourceRendering = (disableSourceRendering != null) && disableSourceRendering;
+        this.disableSnippets = (disableSnippets != null) && disableSnippets;
         this.quick = (quick != null) && quick;
         this.rules = rules;
         this.workers = workers;
@@ -205,6 +208,14 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
     }
 
     /**
+     * Retrieves value of disable snippets. This is a per-build config item.
+     * This method must match the value in <tt>config.jelly</tt>.
+     */
+    public Boolean getDisableSnippets() {
+        return disableSnippets;
+    }
+
+    /**
      * Retrieves value of quick scan. This is a per-build config item.
      * This method must match the value in <tt>config.jelly</tt>.
      */
@@ -290,6 +301,7 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
         append(command, substituteVariable(build, listener, filter), "-filter");
         append(command, noDefaultRules, "-no-default-rules");
         append(command, disableSourceRendering, "-disable-source-rendering");
+        append(command, disableSnippets, "-Dcom.fortify.sca.FVDLDisableSnippets=true");
         append(command, quick, "-quick");
         append(command, substituteVariable(build, listener, rules), "-rules");
         append(command, substituteVariable(build, listener, workers), "-j");
