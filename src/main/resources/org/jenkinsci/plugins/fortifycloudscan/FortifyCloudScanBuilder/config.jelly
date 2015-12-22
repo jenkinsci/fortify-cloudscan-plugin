@@ -70,6 +70,9 @@ limitations under the License.
         <f:entry title="${%disableSourceRendering}" description="" help="/plugin/fortify-cloudscan-jenkins-plugin/help-disable-source-rendering.html">
             <f:checkbox id="disableSourceRendering" name="disableSourceRendering" checked="${instance.getDisableSourceRendering()}"/>
         </f:entry>
+        <f:entry title="${%disableSnippets}" description="" help="/plugin/fortify-cloudscan-jenkins-plugin/help-disable-snippets.html">
+            <f:checkbox id="disableSnippets" name="disableSnippets" checked="${instance.getDisableSnippets()}"/>
+        </f:entry>
         <f:entry title="${%quick}" description="" help="/plugin/fortify-cloudscan-jenkins-plugin/help-quick.html">
             <f:checkbox id="quick" name="quick" checked="${instance.getQuick()}"/>
         </f:entry>
