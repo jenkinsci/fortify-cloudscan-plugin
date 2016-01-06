@@ -52,8 +52,9 @@ public class FortifyCloudScanExecutor implements Serializable {
      */
     public boolean perform(Map envVars, String[] command) {
         String[] versionCommand = {command[0], "-version"};
+        //logCommand(versionCommand);
         execute(envVars, versionCommand);
-        logCommand(versionCommand);
+        //logCommand(command);
         return execute(envVars, command);
     }
 

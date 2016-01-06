@@ -325,6 +325,10 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
         if (confItem instanceof String) {
             String value = (String)confItem;
             if (StringUtils.isNotBlank(value)) {
+                if (value.contains(" ")) {
+                    // Surround the value in quotes
+                    value = "\"" + value + "\"";
+                }
                 if (concat) {
                     command.add(arg + value);
                 } else {
