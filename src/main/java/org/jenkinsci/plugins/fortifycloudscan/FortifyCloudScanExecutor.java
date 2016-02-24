@@ -16,16 +16,10 @@
 package org.jenkinsci.plugins.fortifycloudscan;
 
 import hudson.model.BuildListener;
-import org.jenkinsci.plugins.fortifycloudscan.util.ArrayUtil;
 import org.jenkinsci.plugins.fortifycloudscan.util.CommandUtil;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Serializable;
+import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -40,14 +34,17 @@ public class FortifyCloudScanExecutor implements Serializable {
     private static final long serialVersionUID = 3595913479313812273L;
 
     private ConsoleLogger logger;
+    private Options options;
 
     /**
      * Constructs a new FortifyCloudScanExecutor object.
      *
      * @param listener BuildListener object to interact with the current build
+     * @param options The options that will be used during execution
      */
-    public FortifyCloudScanExecutor(BuildListener listener) {
-        logger = new ConsoleLogger(listener);
+    public FortifyCloudScanExecutor(BuildListener listener, Options options) {
+        this.logger = new ConsoleLogger(listener);
+        this.options = options;
     }
 
     /**
@@ -55,14 +52,23 @@ public class FortifyCloudScanExecutor implements Serializable {
      *
      * @return a boolean value indicating if the command was executed successfully or not.
      */
-    public boolean perform(Map envVars, String[] command, String[] rules, String[] scanOpts) {
-        String[] versionCommand = {command[0], "-version"};
+    public boolean perform() {
+    //public boolean perform(Map envVars, String[] command, String[] rules, String[] scanOpts, String workspace) {
+        String[] versionCommand = {options.getCommand(), "-version"};
         logCommand(versionCommand);
-        execute(envVars, versionCommand);
+        execute(options.getEnvVars(), versionCommand);
 
-        String[] mergedCommand = ArrayUtil.merge(command, processRules(rules), scanOpts);
-        logCommand(mergedCommand);
-        return execute(envVars, mergedCommand);
+        // Generate a list of Strings representing the entire command to execute
+        ArrayList<String> mergedCommand = new ArrayList<String>();
+        mergedCommand.add(options.getCommand());
+        mergedCommand.addAll(options.getArgs());
+        mergedCommand.addAll(processRules(options.getRules(), options.getWorkspace()));
+        mergedCommand.addAll(options.getScanOpts());
+
+        // Convert/cast to a String[] so that it can be logged and executed
+        String[] mergedCommandArray = mergedCommand.toArray(new String[mergedCommand.size()]);
+        logCommand(mergedCommandArray);
+        return execute(options.getEnvVars(), mergedCommandArray);
     }
 
     /**
@@ -70,15 +76,17 @@ public class FortifyCloudScanExecutor implements Serializable {
      * @param rules the string array of rulepack locations
      * @return the command arguments containing resolved rulepack locations
      */
-    private String[] processRules(String[] rules) {
+    private List<String> processRules(List<String> rules, String workspace) {
         List<String> command = new ArrayList<String>();
-        RulepackResolver resolver = new RulepackResolver(this.logger);
+        RulepackResolver resolver = new RulepackResolver(logger);
+        resolver.setTempDir(workspace);
         for (String rule : rules) {
-            CommandUtil.append(command, resolver.resolve(rule).getAbsolutePath(), "-rules");
+            File file = resolver.resolve(rule);
+            if (file != null) {
+                CommandUtil.append(command, file.getAbsolutePath(), "-rules");
+            }
         }
-
-        Object[] objectList = command.toArray();
-        return Arrays.copyOf(objectList, objectList.length, String[].class);
+        return command;
     }
 
     /**

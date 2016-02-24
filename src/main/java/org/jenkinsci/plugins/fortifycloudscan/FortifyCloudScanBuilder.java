@@ -17,7 +17,6 @@ package org.jenkinsci.plugins.fortifycloudscan;
 
 import com.fortifysoftware.schema.wsTypes.Project;
 import com.fortifysoftware.schema.wsTypes.ProjectVersionLite;
-import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -252,93 +251,107 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
     public boolean perform(final AbstractBuild build, final Launcher launcher, final BuildListener listener)
             throws InterruptedException, IOException {
 
-        final EnvVars env = build.getEnvironment(listener);
-        final String[] args = generateArgs(build, listener);
-        final String[] rules = preProcessRules(build, listener);
-        final String[] scanOpts = generateScanOptions(build, listener);
+        final Options options = new Options();
+        options.setEnvVars(build.getEnvironment(listener));
+        options.setCommand(generateCommand(build, listener));
+        options.setArgs(generateArgs(build, listener));
+        options.setRules(preProcessRules(build, listener));
+        options.setScanOpts(generateScanOptions(build, listener));
+        options.setWorkspace(build.getWorkspace().getRemote());
 
         return launcher.getChannel().call(new MasterToSlaveCallable<Boolean, IOException>() {
             public Boolean call() throws IOException {
-                final FortifyCloudScanExecutor executor = new FortifyCloudScanExecutor(listener);
-                return executor.perform(env, args, rules, scanOpts);
+                final FortifyCloudScanExecutor executor = new FortifyCloudScanExecutor(listener, options);
+                return executor.perform();
             }
         });
+    }
+
+    /**
+     * Generate the cloudscan exeutable command
+     * @param build an AbstractBuild object
+     * @param listener A BuildListener object
+     * @return fortifycloudscan Arguments
+     */
+    private String generateCommand(AbstractBuild build, BuildListener listener) {
+        // Check if the path to the cloudscan executable was specified
+        String exePath = substituteVariable(build, listener, this.getDescriptor().getExePath());
+        if (StringUtils.isNotBlank(exePath)) {
+            return exePath;
+        } else {
+            // Path was not specified, so just default to running 'cloudscan'. Must be in the path.
+            return "cloudscan";
+        }
     }
 
     /**
      * Generate Options from build configuration preferences that will be passed to
      * the build step in fortifycloudscan
      * @param build an AbstractBuild object
+     * @param listener A BuildListener object
      * @return fortifycloudscan Arguments
      */
-    private String[] generateArgs(AbstractBuild build, BuildListener listener) {
-        List<String> command = new ArrayList<String>();
+    private List<String> generateArgs(AbstractBuild build, BuildListener listener) {
+        List<String> args = new ArrayList<String>();
 
-        // Check if the path to the cloudscan executable was specified
-        String exePath = substituteVariable(build, listener, this.getDescriptor().getExePath());
-        if (StringUtils.isNotBlank(exePath)) {
-            command.add(exePath);
-        } else {
-            // Path was not specified, so just default to running 'cloudscan'. Must be in the path.
-            command.add("cloudscan");
-        }
         if (useSsc) {
-            CommandUtil.append(command, substituteVariable(build, listener, this.getDescriptor().getSscUrl()), "-sscurl");
-            CommandUtil.append(command, substituteVariable(build, listener, sscToken), "-ssctoken");
-            CommandUtil.append(command, null, "start");
-            CommandUtil.append(command, null, "-upload");
-            CommandUtil.append(command, substituteVariable(build, listener, versionId), "-versionid");
-            CommandUtil.append(command, substituteVariable(build, listener, upToken), "-uptoken");
+            CommandUtil.append(args, substituteVariable(build, listener, this.getDescriptor().getSscUrl()), "-sscurl");
+            CommandUtil.append(args, substituteVariable(build, listener, sscToken), "-ssctoken");
+            CommandUtil.append(args, null, "start");
+            CommandUtil.append(args, null, "-upload");
+            CommandUtil.append(args, substituteVariable(build, listener, versionId), "-versionid");
+            CommandUtil.append(args, substituteVariable(build, listener, upToken), "-uptoken");
         } else {
-            CommandUtil.append(command, substituteVariable(build, listener, this.getDescriptor().getControllerUrl()), "-url");
-            CommandUtil.append(command, null, "start");
+            CommandUtil.append(args, substituteVariable(build, listener, this.getDescriptor().getControllerUrl()), "-url");
+            CommandUtil.append(args, null, "start");
         }
         /* Populate CloudScan START command */
-        CommandUtil.append(command, substituteVariable(build, listener, buildId), "-b");
-        CommandUtil.append(command, substituteVariable(build, listener, filter), "-filter");
-        CommandUtil.append(command, noDefaultRules, "-no-default-rules");
+        CommandUtil.append(args, substituteVariable(build, listener, buildId), "-b");
+        CommandUtil.append(args, substituteVariable(build, listener, filter), "-filter");
+        CommandUtil.append(args, noDefaultRules, "-no-default-rules");
 
-        Object[] objectList = command.toArray();
-        return Arrays.copyOf(objectList, objectList.length, String[].class);
+        return args;
     }
 
     /**
      * Pre processes the rules field by separating multiple rules and performing
      * environment variable substitution if necessary.
+     * @param build an AbstractBuild object
+     * @param listener A BuildListener object
      * @return a string array of zero or more rule paths
      */
-    private String[] preProcessRules(AbstractBuild build, BuildListener listener) {
+    private List<String> preProcessRules(AbstractBuild build, BuildListener listener) {
         String[] paths = rules.split("\t|\n|\r|,");
         for (int i=0; i<paths.length; i++) {
             paths[i] = substituteVariable(build, listener, paths[i]);
         }
-        return paths;
+        return Arrays.asList(paths);
     }
 
     /**
      * Generate Scan Options from build configuration preferences that will be passed to
      * the build step in fortifycloudscan
      * @param build an AbstractBuild object
+     * @param listener A BuildListener object
      * @return fortifycloudscan Options
      */
-    private String[] generateScanOptions(AbstractBuild build, BuildListener listener) {
-        List<String> command = new ArrayList<String>();
+    private List<String> generateScanOptions(AbstractBuild build, BuildListener listener) {
+        List<String> scanOptions = new ArrayList<String>();
 
-        CommandUtil.append(command, null, "-scan");
+        CommandUtil.append(scanOptions, null, "-scan");
         /* Populate SCA Scan Arguments */
         // Everthing appearing after -scan are parameters specific to sourceanalyzer
-        CommandUtil.append(command, substituteVariable(build, listener, xmx), "-Xmx", true);
-        CommandUtil.append(command, substituteVariable(build, listener, buildLabel), "-build-label");
-        CommandUtil.append(command, substituteVariable(build, listener, buildProject), "-build-project");
-        CommandUtil.append(command, substituteVariable(build, listener, buildVersion), "-build-version");
-        CommandUtil.append(command, substituteVariable(build, listener, scanArgs), scanArgs);
-        CommandUtil.append(command, disableSourceRendering, "-disable-source-rendering");
-        CommandUtil.append(command, disableSnippets, "-Dcom.fortify.sca.FVDLDisableSnippets=true");
-        CommandUtil.append(command, quick, "-quick");
-        CommandUtil.append(command, substituteVariable(build, listener, workers), "-j");
+        CommandUtil.append(scanOptions, substituteVariable(build, listener, xmx), "-Xmx", true);
+        CommandUtil.append(scanOptions, substituteVariable(build, listener, buildLabel), "-build-label");
+        CommandUtil.append(scanOptions, substituteVariable(build, listener, buildProject), "-build-project");
+        CommandUtil.append(scanOptions, substituteVariable(build, listener, buildVersion), "-build-version");
+        CommandUtil.append(scanOptions, substituteVariable(build, listener, scanArgs), scanArgs);
+        CommandUtil.append(scanOptions, disableSourceRendering, "-disable-source-rendering");
+        CommandUtil.append(scanOptions, disableSnippets, "-Dcom.fortify.sca.FVDLDisableSnippets=true");
+        CommandUtil.append(scanOptions, quick, "-quick");
+        CommandUtil.append(scanOptions, substituteVariable(build, listener, workers), "-j");
 
-        Object[] objectList = command.toArray();
-        return Arrays.copyOf(objectList, objectList.length, String[].class);
+        return scanOptions;
     }
 
     /**

@@ -38,10 +38,11 @@ import java.util.UUID;
 public class RulepackResolver {
 
     private ConsoleLogger logger;
-
+    private String tempDir;
 
     public RulepackResolver(ConsoleLogger logger) {
         this.logger = logger;
+        tempDir = System.getProperty("java.io.tmpdir");
     }
 
     /**
@@ -55,7 +56,9 @@ public class RulepackResolver {
         try {
             URL url = new URL(location);
             File download = download(url);
-            return extractArchive(download);
+            if (download != null) {
+                return extractArchive(download);
+            }
         } catch (MalformedURLException e) {
             File file = new File(location);
             if (file.exists()) {
@@ -74,11 +77,8 @@ public class RulepackResolver {
      */
     private File download(URL url) {
         String urlString = url.toExternalForm();
-        File temp = new File(System.getProperty("java.io.tmpdir") + File.separator +
+        File temp = new File(tempDir + File.separator +
                 FortifyCloudScanPlugin.PLUGIN_NAME + File.separator + UUID.randomUUID());
-        if (temp.mkdirs()) {
-            logger.log("Created temporary rulepack download directory");
-        }
 
         CloseableHttpClient httpclient = HttpClients.createDefault();
         HttpGet httpGet = new HttpGet(urlString);
@@ -86,17 +86,26 @@ public class RulepackResolver {
         CloseableHttpResponse response;
         File downloadedFile;
         try {
+            logger.log("Downloading rulepack from " + urlString);
             response = httpclient.execute(httpGet);
-            String suggestedFilename = getSuggestedFilename(response);
-            String filename = (suggestedFilename != null) ? suggestedFilename : FilenameUtils.getName(urlString);
-            downloadedFile = new File(temp + File.separator + filename);
+            if (response.getStatusLine().getStatusCode() == 200) {
+                if (temp.mkdirs()) {
+                    logger.log("Created temporary rulepack download directory");
+                }
+                String suggestedFilename = getSuggestedFilename(response);
+                String filename = (suggestedFilename != null) ? suggestedFilename : FilenameUtils.getName(urlString);
+                downloadedFile = new File(temp + File.separator + filename);
+            } else {
+                logger.log("ERROR: Remote file cannot be downloaded");
+                logger.log("ERROR: Status Code: " + response.getStatusLine().getStatusCode() + " - " + response.getStatusLine().getReasonPhrase());
+                return null;
+            }
         } catch (IOException e) {
-            logger.log("An error occurred while attempting to download rulepack");
+            logger.log("ERROR: An error occurred while attempting to download rulepack");
             logger.log(e.getMessage());
             return null;
         }
         HttpEntity entity = response.getEntity();
-        logger.log("Downloading rulepack from " + urlString);
         try {
             if (entity != null) {
                 FileOutputStream outstream = new FileOutputStream(downloadedFile);
@@ -104,10 +113,10 @@ public class RulepackResolver {
                 logger.log("Rulepack saved to " + downloadedFile.getAbsolutePath());
             }
         } catch (FileNotFoundException e) {
-            logger.log("The download file location cannot be found");
+            logger.log("ERROR: The download file location cannot be found");
             logger.log(e.getMessage());
         } catch (IOException e) {
-            logger.log("An error occurred while saving the rulepack");
+            logger.log("ERROR: An error occurred while saving the rulepack");
             logger.log(e.getMessage());
         }
         return downloadedFile;
@@ -162,10 +171,10 @@ public class RulepackResolver {
             ArchiveUtil.unzip(extractedDir, file);
             return extractedDir;
         } catch (FileNotFoundException e) {
-            logger.log("The file to extract could not be found");
+            logger.log("ERROR: The file to extract could not be found");
             logger.log(e.getMessage());
         } catch (IOException e) {
-            logger.log("An unknown error occurred while extracting archive");
+            logger.log("ERROR: An unknown error occurred while extracting archive");
             logger.log(e.getMessage());
         } finally {
             if (file.delete()) {
@@ -173,6 +182,16 @@ public class RulepackResolver {
             }
         }
         return null;
+    }
+
+    public void setTempDir(String directory) {
+        File file = new File(directory);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+        if (file.isDirectory()) {
+            this.tempDir = directory;
+        }
     }
 
 }
