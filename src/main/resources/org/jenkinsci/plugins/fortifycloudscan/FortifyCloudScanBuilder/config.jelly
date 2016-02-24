@@ -77,7 +77,7 @@ limitations under the License.
             <f:checkbox id="quick" name="quick" checked="${instance.getQuick()}"/>
         </f:entry>
         <f:entry title="${%rules}" field="rules" help="/plugin/fortify-cloudscan-jenkins-plugin/help-rules.html">
-            <f:textbox id="rules"/>
+            <f:expandableTextbox id="rules"/>
         </f:entry>
         <f:entry title="${%workers}" field="workers" help="/plugin/fortify-cloudscan-jenkins-plugin/help-workers.html">
             <f:textbox id="workers"/>
