@@ -16,12 +16,17 @@
 package org.jenkinsci.plugins.fortifycloudscan;
 
 import hudson.model.BuildListener;
+import org.jenkinsci.plugins.fortifycloudscan.util.ArrayUtil;
+import org.jenkinsci.plugins.fortifycloudscan.util.CommandUtil;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,7 +39,7 @@ public class FortifyCloudScanExecutor implements Serializable {
 
     private static final long serialVersionUID = 3595913479313812273L;
 
-    private BuildListener listener;
+    private ConsoleLogger logger;
 
     /**
      * Constructs a new FortifyCloudScanExecutor object.
@@ -42,7 +47,7 @@ public class FortifyCloudScanExecutor implements Serializable {
      * @param listener BuildListener object to interact with the current build
      */
     public FortifyCloudScanExecutor(BuildListener listener) {
-        this.listener = listener;
+        logger = new ConsoleLogger(listener);
     }
 
     /**
@@ -50,12 +55,30 @@ public class FortifyCloudScanExecutor implements Serializable {
      *
      * @return a boolean value indicating if the command was executed successfully or not.
      */
-    public boolean perform(Map envVars, String[] command) {
+    public boolean perform(Map envVars, String[] command, String[] rules, String[] scanOpts) {
         String[] versionCommand = {command[0], "-version"};
         logCommand(versionCommand);
         execute(envVars, versionCommand);
-        logCommand(command);
-        return execute(envVars, command);
+
+        String[] mergedCommand = ArrayUtil.merge(command, processRules(rules), scanOpts);
+        logCommand(mergedCommand);
+        return execute(envVars, mergedCommand);
+    }
+
+    /**
+     * Process the rule arguments by resolving (and optionally downloading) rulepacks
+     * @param rules the string array of rulepack locations
+     * @return the command arguments containing resolved rulepack locations
+     */
+    private String[] processRules(String[] rules) {
+        List<String> command = new ArrayList<String>();
+        RulepackResolver resolver = new RulepackResolver(this.logger);
+        for (String rule : rules) {
+            CommandUtil.append(command, resolver.resolve(rule).getAbsolutePath(), "-rules");
+        }
+
+        Object[] objectList = command.toArray();
+        return Arrays.copyOf(objectList, objectList.length, String[].class);
     }
 
     /**
@@ -73,20 +96,11 @@ public class FortifyCloudScanExecutor implements Serializable {
             int exitCode = process.waitFor();
             return exitCode == 0;
         } catch (InterruptedException e) {
-            log(Messages.Executor_Failure() + ": " + e.getMessage());
+            logger.log(Messages.Executor_Failure() + ": " + e.getMessage());
         } catch (IOException e) {
-            log(Messages.Executor_Failure() + ": " + e.getMessage());
+            logger.log(Messages.Executor_Failure() + ": " + e.getMessage());
         }
         return false;
-    }
-
-    /**
-     * Log messages to the builds console.
-     * @param message The message to log
-     */
-    protected void log(String message) {
-        final String outtag = "[" + FortifyCloudScanPlugin.PLUGIN_NAME + "] ";
-        listener.getLogger().println(outtag + message.replaceAll("\\n", "\n" + outtag));
     }
 
     private void logCommand(String[] command) {
@@ -94,7 +108,7 @@ public class FortifyCloudScanExecutor implements Serializable {
         for (String param : command) {
             cmd = cmd + param + " ";
         }
-        log(cmd);
+        logger.log(cmd);
     }
 
     private class StreamLogger extends Thread {
@@ -111,7 +125,7 @@ public class FortifyCloudScanExecutor implements Serializable {
                 BufferedReader br = new BufferedReader(isr);
                 String line;
                 while ((line = br.readLine()) != null) {
-                    log(line);
+                    logger.log(line);
                 }
             }
             catch (IOException ioe) {
