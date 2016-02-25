@@ -84,7 +84,8 @@ public class FortifyCloudScanExecutor implements Serializable {
     private List<String> processRules(List<String> rules, String workspace) {
         List<String> command = new ArrayList<String>();
         RulepackResolver resolver = new RulepackResolver(logger);
-        resolver.setTempDir(workspace);
+        //todo: need to make this configurable for workspace or any other user-defined directory
+        //resolver.setTempDir(workspace);
         for (String rule : rules) {
             File file = resolver.resolve(rule);
             if (file != null) {
