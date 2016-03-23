@@ -15,15 +15,20 @@
  */
 package org.jenkinsci.plugins.fortifycloudscan;
 
+import hudson.console.LineTransformationOutputStream;
 import hudson.model.BuildListener;
 
+import java.io.IOException;
+import java.io.PrintStream;
 
-public class ConsoleLogger {
 
-    private BuildListener listener;
+public class ConsoleLogger extends LineTransformationOutputStream {
+
+    private final PrintStream logger;
+    private static final String PREFIX = "[" + FortifyCloudScanPlugin.PLUGIN_NAME + "] ";
 
     public ConsoleLogger(BuildListener listener) {
-        this.listener = listener;
+        this.logger = listener.getLogger();
     }
 
     /**
@@ -31,8 +36,16 @@ public class ConsoleLogger {
      * @param message The message to log
      */
     protected void log(String message) {
-        final String outtag = "[" + FortifyCloudScanPlugin.PLUGIN_NAME + "] ";
-        listener.getLogger().println(outtag + message.replaceAll("\\n", "\n" + outtag));
+        logger.println(PREFIX + message.replaceAll("\\n", "\n" + PREFIX));
+    }
+
+    /**
+     * Changes each new line to append the prefix before logging
+     */
+    @Override
+    protected void eol(byte[] b, int len) throws IOException {
+        logger.append(PREFIX);
+        logger.write(b, 0, len);
     }
 
 }

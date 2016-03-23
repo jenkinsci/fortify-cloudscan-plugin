@@ -17,6 +17,7 @@ package org.jenkinsci.plugins.fortifycloudscan;
 
 import com.fortifysoftware.schema.wsTypes.Project;
 import com.fortifysoftware.schema.wsTypes.ProjectVersionLite;
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -37,6 +38,7 @@ import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -259,12 +261,21 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
         options.setScanOpts(generateScanOptions(build, listener));
         options.setWorkspace(build.getWorkspace().getRemote());
 
-        return launcher.getChannel().call(new MasterToSlaveCallable<Boolean, IOException>() {
-            public Boolean call() throws IOException {
+        EnvVars env = build.getEnvironment(listener);
+        String command = launcher.decorateByEnv(env).getChannel().call(new MasterToSlaveCallable<String, IOException>() {
+            public String call() throws IOException {
                 final FortifyCloudScanExecutor executor = new FortifyCloudScanExecutor(listener, options);
-                return executor.perform();
+                return executor.prepare();
             }
         });
+        String versionCommand = launcher.decorateByEnv(env).getChannel().call(new MasterToSlaveCallable<String, IOException>() {
+            public String call() throws IOException {
+                return CommandUtil.generateShellCommand(new String[] {options.getCommand(), "-version"});
+            }
+        });
+        OutputStream logger = new ConsoleLogger(listener);
+        launcher.launch().cmdAsSingleString(versionCommand).envs(env).stdout(logger).start().join();
+        return launcher.launch().cmdAsSingleString(command).envs(env).stdout(logger).start().join() == 0;
     }
 
     /**

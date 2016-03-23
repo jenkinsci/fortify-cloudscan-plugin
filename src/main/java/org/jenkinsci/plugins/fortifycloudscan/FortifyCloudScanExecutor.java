@@ -18,19 +18,14 @@ package org.jenkinsci.plugins.fortifycloudscan;
 import hudson.model.BuildListener;
 import org.jenkinsci.plugins.fortifycloudscan.util.CommandUtil;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * This class is called by FortifyCloudScanBuilder (the Jenkins build-step plugin).
- * Performs the external execution of the cloudscan command line interface.
+ * Prepares the command for execution (does not actually execute cloudscan)
  *
  * @author Steve Springett (steve.springett@owasp.org)
  */
@@ -38,8 +33,8 @@ public class FortifyCloudScanExecutor implements Serializable {
 
     private static final long serialVersionUID = 3595913479313812273L;
 
-    private ConsoleLogger logger;
-    private Options options;
+    private final ConsoleLogger logger;
+    private final Options options;
 
     /**
      * Constructs a new FortifyCloudScanExecutor object.
@@ -53,16 +48,10 @@ public class FortifyCloudScanExecutor implements Serializable {
     }
 
     /**
-     * Executes cloudscan with configured arguments
-     *
-     * @return a boolean value indicating if the command was executed successfully or not.
+     * Given the specified options, this method will dynamically construct the
+     * full command line syntax necessary to execute cloudscan.
      */
-    public boolean perform() {
-    //public boolean perform(Map envVars, String[] command, String[] rules, String[] scanOpts, String workspace) {
-        String[] versionCommand = {options.getCommand(), "-version"};
-        logCommand(versionCommand);
-        execute(options.getEnvVars(), versionCommand);
-
+    public String prepare() {
         // Generate a list of Strings representing the entire command to execute
         ArrayList<String> mergedCommand = new ArrayList<String>();
         mergedCommand.add(options.getCommand());
@@ -71,9 +60,8 @@ public class FortifyCloudScanExecutor implements Serializable {
         mergedCommand.addAll(options.getScanOpts());
 
         // Convert/cast to a String[] so that it can be logged and executed
-        String[] mergedCommandArray = mergedCommand.toArray(new String[mergedCommand.size()]);
-        logCommand(mergedCommandArray);
-        return execute(options.getEnvVars(), mergedCommandArray);
+        String[] command = mergedCommand.toArray(new String[mergedCommand.size()]);
+        return CommandUtil.generateShellCommand(command);
     }
 
     /**
@@ -93,59 +81,6 @@ public class FortifyCloudScanExecutor implements Serializable {
             }
         }
         return command;
-    }
-
-    /**
-     * Executes the external cloudscan process sending stderr and stdout to the logger
-     */
-    private boolean execute(Map envVars, String[] command) {
-        ProcessBuilder pb = new ProcessBuilder(command);
-        pb.environment().putAll(envVars);
-        try {
-            Process process = pb.start();
-
-            new StreamLogger(process.getErrorStream()).start();
-            new StreamLogger(process.getInputStream()).start();
-
-            int exitCode = process.waitFor();
-            return exitCode == 0;
-        } catch (InterruptedException e) {
-            logger.log(Messages.Executor_Failure() + ": " + e.getMessage());
-        } catch (IOException e) {
-            logger.log(Messages.Executor_Failure() + ": " + e.getMessage());
-        }
-        return false;
-    }
-
-    private void logCommand(String[] command) {
-        String cmd = Messages.Executor_Display_Options() + ": ";
-        for (String param : command) {
-            cmd = cmd + param + " ";
-        }
-        logger.log(cmd);
-    }
-
-    private class StreamLogger extends Thread {
-        InputStream is;
-
-        private StreamLogger(InputStream is) {
-            this.is = is;
-        }
-
-        @Override
-        public void run() {
-            try {
-                InputStreamReader isr = new InputStreamReader(is);
-                BufferedReader br = new BufferedReader(isr);
-                String line;
-                while ((line = br.readLine()) != null) {
-                    logger.log(line);
-                }
-            }
-            catch (IOException ioe) {
-                ioe.printStackTrace();
-            }
-        }
     }
 
 }
