@@ -61,7 +61,9 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
     private static final long serialVersionUID = 5441945995905689815L;
 
     private final String buildId;
+    private final boolean useAutoHeap;
     private final String xmx;
+    private final String rmiWorkerMaxHeap;
     private final String buildLabel;
     private final String buildProject;
     private final String buildVersion;
@@ -80,14 +82,21 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
 
 
     @DataBoundConstructor // Fields in config.jelly must match the parameter names
-    public FortifyCloudScanBuilder(String buildId, String xmx, String buildLabel, String buildProject,
-                                   String buildVersion, Boolean useSsc, String sscToken, String upToken,
-                                   String versionId, String scanArgs, String filter, Boolean noDefaultRules,
-                                   Boolean disableSourceRendering, Boolean disableSnippets, Boolean quick,
-                                   String rules, String workers) {
+    public FortifyCloudScanBuilder(String buildId, Boolean useAutoHeap, String xmx, String rmiWorkerMaxHeap,
+                                   String buildLabel, String buildProject, String buildVersion, Boolean useSsc,
+                                   String sscToken, String upToken, String versionId, String scanArgs, String filter,
+                                   Boolean noDefaultRules, Boolean disableSourceRendering, Boolean disableSnippets,
+                                   Boolean quick, String rules, String workers) {
 
         this.buildId = buildId;
-        this.xmx = xmx;
+        this.useAutoHeap = (useAutoHeap != null) && !useAutoHeap; // This value comes in negated
+        if (this.useAutoHeap) {
+            this.xmx = null;
+            this.rmiWorkerMaxHeap = null;
+        } else {
+            this.xmx = xmx;
+            this.rmiWorkerMaxHeap = rmiWorkerMaxHeap;
+        }
         this.buildLabel = buildLabel;
         this.buildProject = buildProject;
         this.buildVersion = buildVersion;
@@ -114,11 +123,27 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
     }
 
     /**
+     * Retrieves if autoheap should be used. This is a per-build config item.
+     * This method must match the value in <tt>config.jelly</tt>.
+     */
+    public boolean getUseAutoHeap() {
+        return useAutoHeap;
+    }
+
+    /**
      * Retrieves the XMX. This is a per-build config item.
      * This method must match the value in <tt>config.jelly</tt>.
      */
     public String getXmx() {
         return xmx;
+    }
+
+    /**
+     * Retrieves the RmiWorkerMaxHeap. This is a per-build config item.
+     * This method must match the value in <tt>config.jelly</tt>.
+     */
+    public String getRmiWorkerMaxHeap() {
+        return rmiWorkerMaxHeap;
     }
 
     /**
@@ -352,7 +377,12 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
         CommandUtil.append(scanOptions, null, "-scan");
         /* Populate SCA Scan Arguments */
         // Everthing appearing after -scan are parameters specific to sourceanalyzer
-        CommandUtil.append(scanOptions, substituteVariable(build, listener, xmx), "-Xmx", true);
+        if (useAutoHeap) {
+            CommandUtil.append(scanOptions, useAutoHeap, "-autoheap");
+        } else {
+            CommandUtil.append(scanOptions, substituteVariable(build, listener, xmx), "-Xmx", true);
+            CommandUtil.append(scanOptions, substituteVariable(build, listener, rmiWorkerMaxHeap), "-Dcom.fortify.sca.RmiWorkerMaxHeap=", true);
+        }
         CommandUtil.append(scanOptions, substituteVariable(build, listener, buildLabel), "-build-label");
         CommandUtil.append(scanOptions, substituteVariable(build, listener, buildProject), "-build-project");
         CommandUtil.append(scanOptions, substituteVariable(build, listener, buildVersion), "-build-version");

@@ -18,9 +18,6 @@ limitations under the License.
     <f:entry title="${%buildId}" field="buildId" help="/plugin/fortify-cloudscan-jenkins-plugin/help-buildid.html">
         <f:textbox id="buildId"/>
     </f:entry>
-    <f:entry title="${%xmx}" field="xmx" help="/plugin/fortify-cloudscan-jenkins-plugin/help-xmx.html">
-        <f:textbox id="xmx"/>
-    </f:entry>
 
     <f:entry title="Tags" help="/plugin/fortify-cloudscan-jenkins-plugin/help-optional-build.html">
         <table>
@@ -39,6 +36,15 @@ limitations under the License.
             </tbody>
         </table>
     </f:entry>
+
+    <f:optionalBlock name="useAutoHeap" title="${%useAutoHeap}" inline="true" checked="${instance.getUseAutoHeap()}" negative="true" help="/plugin/fortify-cloudscan-jenkins-plugin/help-useautoheap.html">
+        <f:entry title="${%xmx}" field="xmx" help="/plugin/fortify-cloudscan-jenkins-plugin/help-xmx.html">
+            <f:textbox id="xmx"/>
+        </f:entry>
+        <f:entry title="${%rmiWorkerMaxHeap}" field="rmiWorkerMaxHeap" help="/plugin/fortify-cloudscan-jenkins-plugin/help-rmi-worker-max-heap.html">
+            <f:textbox id="rmiWorkerMaxHeap"/>
+        </f:entry>
+    </f:optionalBlock>
 
     <f:optionalBlock name="useSsc" title="${%useSsc}" inline="true" checked="${instance.getUseSsc()}" help="/plugin/fortify-cloudscan-jenkins-plugin/help-usessc.html">
         <f:entry title="${%upToken}" field="upToken" help="/plugin/fortify-cloudscan-jenkins-plugin/help-uptoken.html">
