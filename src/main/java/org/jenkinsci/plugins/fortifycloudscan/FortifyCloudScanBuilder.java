@@ -386,7 +386,7 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
         CommandUtil.append(scanOptions, substituteVariable(build, listener, buildLabel), "-build-label");
         CommandUtil.append(scanOptions, substituteVariable(build, listener, buildProject), "-build-project");
         CommandUtil.append(scanOptions, substituteVariable(build, listener, buildVersion), "-build-version");
-        CommandUtil.append(scanOptions, substituteVariable(build, listener, scanArgs), scanArgs);
+        CommandUtil.append(scanOptions, null, substituteVariable(build, listener, scanArgs));
         CommandUtil.append(scanOptions, disableSourceRendering, "-disable-source-rendering");
         CommandUtil.append(scanOptions, disableSnippets, "-Dcom.fortify.sca.FVDLDisableSnippets=true");
         CommandUtil.append(scanOptions, quick, "-quick");
