@@ -26,7 +26,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.jenkinsci.plugins.fortifycloudscan.util.ArchiveUtil;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
