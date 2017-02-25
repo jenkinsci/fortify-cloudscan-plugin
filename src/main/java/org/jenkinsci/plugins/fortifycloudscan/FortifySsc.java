@@ -22,7 +22,6 @@ import com.fortify.schema.fws.ProjectListResponseDocument;
 import com.fortifysoftware.schema.wsTypes.Project;
 import com.fortifysoftware.schema.wsTypes.ProjectVersionLite;
 import org.apache.xmlbeans.XmlException;
-
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import java.io.IOException;
