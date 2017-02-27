@@ -23,19 +23,22 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.BuildListener;
+import hudson.model.Result;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.security.MasterToSlaveCallable;
+import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.fortifycloudscan.util.CommandUtil;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
-
+import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -56,7 +59,7 @@ import java.util.regex.Pattern;
  * @author Steve Springett (steve.springett@owasp.org)
  */
 @SuppressWarnings("unused")
-public class FortifyCloudScanBuilder extends Builder implements Serializable {
+public class FortifyCloudScanBuilder extends Builder implements SimpleBuildStep, Serializable {
 
     private static final long serialVersionUID = 5441945995905689815L;
 
@@ -269,22 +272,23 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
     /**
      * This method is called whenever the build step is executed.
      *
-     * @param build    A Build object
+     * @param build    A Run object
+     * @param filePath A FilePath object
      * @param launcher A Launcher object
      * @param listener A BuildListener object
-     * @return A true or false value indicating if the build was successful or if it failed
      */
     @Override
-    public boolean perform(final AbstractBuild build, final Launcher launcher, final BuildListener listener)
-            throws InterruptedException, IOException {
-
+    public void perform(@Nonnull final Run<?, ?> build,
+                        @Nonnull final FilePath filePath,
+                        @Nonnull final Launcher launcher,
+                        @Nonnull final TaskListener listener) throws InterruptedException, IOException {
         final Options options = new Options();
         options.setEnvVars(build.getEnvironment(listener));
         options.setCommand(generateCommand(build, listener));
         options.setArgs(generateArgs(build, listener));
         options.setRules(preProcessRules(build, listener));
         options.setScanOpts(generateScanOptions(build, listener));
-        options.setWorkspace(build.getWorkspace().getRemote());
+        options.setWorkspace(filePath.getRemote());
 
         EnvVars env = build.getEnvironment(listener);
         String command = launcher.decorateByEnv(env).getChannel().call(new MasterToSlaveCallable<String, IOException>() {
@@ -300,8 +304,13 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
         });
         OutputStream logger = new ConsoleLogger(listener);
         launcher.launch().cmdAsSingleString(versionCommand).envs(env).stdout(logger).start().join();
-        return launcher.launch().cmdAsSingleString(command).envs(env).stdout(logger).start().join() == 0;
+        if (launcher.launch().cmdAsSingleString(command).envs(env).stdout(logger).start().join() == 0) {
+            build.setResult(Result.SUCCESS);
+        } else {
+            build.setResult(Result.FAILURE);
+        }
     }
+
 
     /**
      * Generate the cloudscan exeutable command
@@ -309,7 +318,7 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
      * @param listener A BuildListener object
      * @return fortifycloudscan Arguments
      */
-    private String generateCommand(AbstractBuild build, BuildListener listener) {
+    private String generateCommand(Run<?, ?> build, TaskListener listener) {
         // Check if the path to the cloudscan executable was specified
         String exePath = substituteVariable(build, listener, this.getDescriptor().getExePath());
         if (StringUtils.isNotBlank(exePath)) {
@@ -327,7 +336,7 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
      * @param listener A BuildListener object
      * @return fortifycloudscan Arguments
      */
-    private List<String> generateArgs(AbstractBuild build, BuildListener listener) {
+    private List<String> generateArgs(Run<?, ?> build, TaskListener listener) {
         List<String> args = new ArrayList<String>();
 
         if (useSsc) {
@@ -356,7 +365,7 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
      * @param listener A BuildListener object
      * @return a string array of zero or more rule paths
      */
-    private List<String> preProcessRules(AbstractBuild build, BuildListener listener) {
+    private List<String> preProcessRules(Run<?, ?> build, TaskListener listener) {
         String[] paths = rules.split("\t|\n|\r|,");
         for (int i=0; i<paths.length; i++) {
             paths[i] = substituteVariable(build, listener, paths[i]);
@@ -371,7 +380,7 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
      * @param listener A BuildListener object
      * @return fortifycloudscan Options
      */
-    private List<String> generateScanOptions(AbstractBuild build, BuildListener listener) {
+    private List<String> generateScanOptions(Run<?, ?> build, TaskListener listener) {
         List<String> scanOptions = new ArrayList<String>();
 
         CommandUtil.append(scanOptions, null, "-scan");
@@ -636,7 +645,12 @@ public class FortifyCloudScanBuilder extends Builder implements Serializable {
      * Replace a Jenkins environment variable in the form ${name} contained in the
      * specified String with the value of the matching environment variable.
      */
-    protected String substituteVariable(AbstractBuild build, BuildListener listener, String parameterizedValue) {
+    protected String substituteVariable(Run<?, ?> build, TaskListener listener, String parameterizedValue) {
+        // We cannot perform variable substitution for Pipeline jobs, so check to see if Run is an instance
+        // of AbstractBuild or not. If not, simply return the value without attempting variable substitution.
+        if (! (build instanceof AbstractBuild)) {
+            return parameterizedValue;
+        }
         try {
             if (parameterizedValue != null && parameterizedValue.contains("${")) {
                 final int start = parameterizedValue.indexOf("${");

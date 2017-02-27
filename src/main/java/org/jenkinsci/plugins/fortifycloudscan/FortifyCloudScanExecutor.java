@@ -15,9 +15,8 @@
  */
 package org.jenkinsci.plugins.fortifycloudscan;
 
-import hudson.model.BuildListener;
+import hudson.model.TaskListener;
 import org.jenkinsci.plugins.fortifycloudscan.util.CommandUtil;
-
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -42,7 +41,7 @@ public class FortifyCloudScanExecutor implements Serializable {
      * @param listener BuildListener object to interact with the current build
      * @param options The options that will be used during execution
      */
-    public FortifyCloudScanExecutor(BuildListener listener, Options options) {
+    public FortifyCloudScanExecutor(TaskListener listener, Options options) {
         this.logger = new ConsoleLogger(listener);
         this.options = options;
     }

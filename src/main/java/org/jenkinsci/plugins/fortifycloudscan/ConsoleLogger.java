@@ -16,8 +16,7 @@
 package org.jenkinsci.plugins.fortifycloudscan;
 
 import hudson.console.LineTransformationOutputStream;
-import hudson.model.BuildListener;
-
+import hudson.model.TaskListener;
 import java.io.IOException;
 import java.io.PrintStream;
 
@@ -27,7 +26,7 @@ public class ConsoleLogger extends LineTransformationOutputStream {
     private final PrintStream logger;
     private static final String PREFIX = "[" + FortifyCloudScanPlugin.PLUGIN_NAME + "] ";
 
-    public ConsoleLogger(BuildListener listener) {
+    public ConsoleLogger(TaskListener listener) {
         this.logger = listener.getLogger();
     }
 
