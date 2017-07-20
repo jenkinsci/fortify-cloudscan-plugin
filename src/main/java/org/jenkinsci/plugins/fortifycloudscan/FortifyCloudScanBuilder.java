@@ -353,7 +353,6 @@ public class FortifyCloudScanBuilder extends Builder implements SimpleBuildStep,
         /* Populate CloudScan START command */
         CommandUtil.append(args, substituteVariable(build, listener, buildId), "-b");
         CommandUtil.append(args, substituteVariable(build, listener, filter), "-filter");
-        CommandUtil.append(args, noDefaultRules, "-no-default-rules");
 
         return args;
     }
@@ -392,6 +391,7 @@ public class FortifyCloudScanBuilder extends Builder implements SimpleBuildStep,
             CommandUtil.append(scanOptions, substituteVariable(build, listener, xmx), "-Xmx", true);
             CommandUtil.append(scanOptions, substituteVariable(build, listener, rmiWorkerMaxHeap), "-Dcom.fortify.sca.RmiWorkerMaxHeap=", true);
         }
+        CommandUtil.append(scanOptions, noDefaultRules, "-no-default-rules");
         CommandUtil.append(scanOptions, substituteVariable(build, listener, buildLabel), "-build-label");
         CommandUtil.append(scanOptions, substituteVariable(build, listener, buildProject), "-build-project");
         CommandUtil.append(scanOptions, substituteVariable(build, listener, buildVersion), "-build-version");
