@@ -15,7 +15,7 @@ Copyright & License
 
 Fortify CloudScan Jenkins Plugin is Copyright (c) Steve Springett. All Rights Reserved.
 
-Fortify and Fortify CloudScan are Copyright (c) Hewlett-Packard. All Rights Reserved.
+Fortify and Fortify CloudScan are Copyright (c) Hewlett-Packard Enterprise. All Rights Reserved.
 
 Permission to modify and redistribute is granted under the terms of the Apache 2.0 license. See the [LICENSE.txt] [license] file for the full license.
 
