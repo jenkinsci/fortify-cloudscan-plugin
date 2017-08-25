@@ -82,11 +82,11 @@ limitations under the License.
         <f:entry title="${%quick}" description="" help="/plugin/fortify-cloudscan-jenkins-plugin/help-quick.html">
             <f:checkbox id="quick" name="quick" checked="${instance.getQuick()}"/>
         </f:entry>
+        <f:entry title="${%useParallelAnalysis}" field="useParallelAnalysis" help="/plugin/fortify-cloudscan-jenkins-plugin/help-parallel-analysis.html">
+            <f:checkbox id="useParallelAnalysis" name="useParallelAnalysis" checked="${instance.getUseParallelAnalysis()}" default="true"/>
+        </f:entry>
         <f:entry title="${%rules}" field="rules" help="/plugin/fortify-cloudscan-jenkins-plugin/help-rules.html">
             <f:expandableTextbox id="rules"/>
-        </f:entry>
-        <f:entry title="${%workers}" field="workers" help="/plugin/fortify-cloudscan-jenkins-plugin/help-workers.html">
-            <f:textbox id="workers"/>
         </f:entry>
         <f:entry title="${%scanArgs}" field="scanArgs" help="/plugin/fortify-cloudscan-jenkins-plugin/help-scanargs.html">
             <f:textarea id="scanArgs"/>

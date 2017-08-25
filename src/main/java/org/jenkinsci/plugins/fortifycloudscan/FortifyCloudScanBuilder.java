@@ -41,7 +41,6 @@ import org.kohsuke.stapler.StaplerRequest;
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -81,7 +80,7 @@ public class FortifyCloudScanBuilder extends Builder implements SimpleBuildStep,
     private final boolean disableSnippets;
     private final boolean quick;
     private final String rules;
-    private final String workers;
+    private final boolean useParallelAnalysis;
 
 
     @DataBoundConstructor // Fields in config.jelly must match the parameter names
@@ -89,7 +88,7 @@ public class FortifyCloudScanBuilder extends Builder implements SimpleBuildStep,
                                    String buildLabel, String buildProject, String buildVersion, Boolean useSsc,
                                    String sscToken, String upToken, String versionId, String scanArgs, String filter,
                                    Boolean noDefaultRules, Boolean disableSourceRendering, Boolean disableSnippets,
-                                   Boolean quick, String rules, String workers) {
+                                   Boolean quick, String rules, Boolean useParallelAnalysis) {
 
         this.buildId = buildId;
         this.useAutoHeap = (useAutoHeap != null) && !useAutoHeap; // This value comes in negated
@@ -114,7 +113,7 @@ public class FortifyCloudScanBuilder extends Builder implements SimpleBuildStep,
         this.disableSnippets = (disableSnippets != null) && disableSnippets;
         this.quick = (quick != null) && quick;
         this.rules = rules;
-        this.workers = workers;
+        this.useParallelAnalysis = (useParallelAnalysis != null) && useParallelAnalysis;
     }
 
     /**
@@ -262,11 +261,11 @@ public class FortifyCloudScanBuilder extends Builder implements SimpleBuildStep,
     }
 
     /**
-     * Retrieves the number of workers. This is a per-build config item.
+     * Retrieves value of useParallelAnalysis. This is a per-build config item.
      * This method must match the value in <tt>config.jelly</tt>.
      */
-    public String getWorkers() {
-        return workers;
+    public Boolean getUseParallelAnalysis() {
+        return useParallelAnalysis;
     }
 
     /**
@@ -282,6 +281,20 @@ public class FortifyCloudScanBuilder extends Builder implements SimpleBuildStep,
                         @Nonnull final FilePath filePath,
                         @Nonnull final Launcher launcher,
                         @Nonnull final TaskListener listener) throws InterruptedException, IOException {
+
+        ConsoleLogger logger = new ConsoleLogger(listener);
+
+        if (useSsc && StringUtils.isBlank(getDescriptor().sscUrl)) {
+            logger.log(Messages.unspecifiedUrl_ssc());
+            build.setResult(Result.FAILURE);
+            return;
+        }
+        if (!useSsc && StringUtils.isBlank(getDescriptor().controllerUrl)) {
+            logger.log(Messages.unspecifiedUrl_controller());
+            build.setResult(Result.FAILURE);
+            return;
+        }
+
         final Options options = new Options();
         options.setEnvVars(build.getEnvironment(listener));
         options.setCommand(generateCommand(build, listener));
@@ -302,7 +315,6 @@ public class FortifyCloudScanBuilder extends Builder implements SimpleBuildStep,
                 return CommandUtil.generateShellCommand(new String[] {options.getCommand(), "-version"});
             }
         });
-        OutputStream logger = new ConsoleLogger(listener);
         launcher.launch().cmdAsSingleString(versionCommand).envs(env).stdout(logger).start().join();
         if (launcher.launch().cmdAsSingleString(command).envs(env).stdout(logger).start().join() == 0) {
             build.setResult(Result.SUCCESS);
@@ -395,11 +407,11 @@ public class FortifyCloudScanBuilder extends Builder implements SimpleBuildStep,
         CommandUtil.append(scanOptions, substituteVariable(build, listener, buildLabel), "-build-label");
         CommandUtil.append(scanOptions, substituteVariable(build, listener, buildProject), "-build-project");
         CommandUtil.append(scanOptions, substituteVariable(build, listener, buildVersion), "-build-version");
-        CommandUtil.append(scanOptions, null, substituteVariable(build, listener, scanArgs));
         CommandUtil.append(scanOptions, disableSourceRendering, "-disable-source-rendering");
         CommandUtil.append(scanOptions, disableSnippets, "-Dcom.fortify.sca.FVDLDisableSnippets=true");
         CommandUtil.append(scanOptions, quick, "-quick");
-        CommandUtil.append(scanOptions, substituteVariable(build, listener, workers), "-j");
+        CommandUtil.append(scanOptions, useParallelAnalysis, "-mt");
+        CommandUtil.append(scanOptions, null, substituteVariable(build, listener, scanArgs));
 
         return scanOptions;
     }
