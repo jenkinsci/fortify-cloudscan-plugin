@@ -110,6 +110,14 @@
                     <schemaDirectory>src/main/resources/ssc</schemaDirectory>
                 </configuration>
             </plugin>
+            <!-- TODO: Remove once Javadoc is fixed -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <additionalparam>-Xdoclint:none</additionalparam>
+                </configuration>
+            </plugin>
         </plugins>
         <resources>
             <resource>
