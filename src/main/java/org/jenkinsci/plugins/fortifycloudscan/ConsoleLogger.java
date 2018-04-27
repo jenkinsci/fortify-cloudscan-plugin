@@ -19,12 +19,14 @@ import hudson.console.LineTransformationOutputStream;
 import hudson.model.TaskListener;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.Serializable;
 
 
-public class ConsoleLogger extends LineTransformationOutputStream {
+public class ConsoleLogger extends LineTransformationOutputStream implements Serializable {
 
-    private final PrintStream logger;
+    private static final long serialVersionUID = -7446496081439196166L;
     private static final String PREFIX = "[" + FortifyCloudScanPlugin.PLUGIN_NAME + "] ";
+    private final PrintStream logger;
 
     public ConsoleLogger(TaskListener listener) {
         this.logger = listener.getLogger();

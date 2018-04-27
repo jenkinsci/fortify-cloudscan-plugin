@@ -682,7 +682,7 @@ public class FortifyCloudScanBuilder extends Builder implements SimpleBuildStep,
             } else {
                 return parameterizedValue;
             }
-        } catch (Exception e) {
+        } catch (IOException | InterruptedException e) {
             return parameterizedValue;
         }
     }

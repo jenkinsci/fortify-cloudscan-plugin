@@ -15,6 +15,7 @@
  */
 package org.jenkinsci.plugins.fortifycloudscan;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
@@ -34,6 +35,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.UUID;
 
+@SuppressFBWarnings(value = "RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
 public class RulepackResolver {
 
     private ConsoleLogger logger;
