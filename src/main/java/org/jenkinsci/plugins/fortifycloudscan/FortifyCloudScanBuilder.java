@@ -34,6 +34,7 @@ import jenkins.security.MasterToSlaveCallable;
 import jenkins.tasks.SimpleBuildStep;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.fortifycloudscan.util.CommandUtil;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -432,7 +433,7 @@ public class FortifyCloudScanBuilder extends Builder implements SimpleBuildStep,
      * See <tt>src/main/resources/org/jenkinsci/plugins/fortifycloudscan/FortifyCloudScanBuilder/*.jelly</tt>
      * for the actual HTML fragment for the configuration screen.
      */
-    @Extension // This indicates to Jenkins that this is an implementation of an extension point.
+    @Extension @Symbol("fortifyCloudScan") // This indicates to Jenkins that this is an implementation of an extension point.
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
         /**
