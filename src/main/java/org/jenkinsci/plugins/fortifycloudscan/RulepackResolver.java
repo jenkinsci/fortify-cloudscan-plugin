@@ -53,13 +53,13 @@ public class RulepackResolver {
      */
     public File resolve(String location) {
         try {
-            URL url = new URL(location);
-            File download = download(url);
+            final URL url = new URL(location);
+            final File download = download(url);
             if (download != null) {
                 return extractArchive(download);
             }
         } catch (MalformedURLException e) {
-            File file = new File(location);
+            final File file = new File(location);
             if (file.exists()) {
                 return file;
             }
@@ -75,15 +75,15 @@ public class RulepackResolver {
      * @return a File object where the downloaded file is saved
      */
     private File download(URL url) {
-        String urlString = url.toExternalForm();
-        File temp = new File(tempDir + File.separator +
+        final String urlString = url.toExternalForm();
+        final File temp = new File(tempDir + File.separator +
                 FortifyCloudScanPlugin.PLUGIN_NAME + File.separator + UUID.randomUUID());
 
-        CloseableHttpClient httpclient = HttpClients.createDefault();
-        HttpGet httpGet = new HttpGet(urlString);
+        final CloseableHttpClient httpclient = HttpClients.createDefault();
+        final HttpGet httpGet = new HttpGet(urlString);
 
-        CloseableHttpResponse response;
-        File downloadedFile;
+        final CloseableHttpResponse response;
+        final File downloadedFile;
         try {
             logger.log("Downloading rulepack from " + urlString);
             response = httpclient.execute(httpGet);
@@ -91,8 +91,8 @@ public class RulepackResolver {
                 if (temp.mkdirs()) {
                     logger.log("Created temporary rulepack download directory");
                 }
-                String suggestedFilename = getSuggestedFilename(response);
-                String filename = (suggestedFilename != null) ? suggestedFilename : FilenameUtils.getName(urlString);
+                final String suggestedFilename = getSuggestedFilename(response);
+                final String filename = (suggestedFilename != null) ? suggestedFilename : FilenameUtils.getName(urlString);
                 downloadedFile = new File(temp + File.separator + filename);
             } else {
                 logger.log("ERROR: Remote file cannot be downloaded");
@@ -104,10 +104,9 @@ public class RulepackResolver {
             logger.log(e.getMessage());
             return null;
         }
-        HttpEntity entity = response.getEntity();
-        try {
+        final HttpEntity entity = response.getEntity();
+        try(FileOutputStream outstream = new FileOutputStream(downloadedFile)) {
             if (entity != null) {
-                FileOutputStream outstream = new FileOutputStream(downloadedFile);
                 entity.writeTo(outstream);
                 logger.log("Rulepack saved to " + downloadedFile.getAbsolutePath());
             }
@@ -127,15 +126,15 @@ public class RulepackResolver {
      * @return the suggested filename parses from the HTTP header. Returns null if parsing is not successful or header is not present.
      */
     private String getSuggestedFilename(HttpResponse response) {
-        Header header = response.getFirstHeader("Content-Disposition");
+        final Header header = response.getFirstHeader("Content-Disposition");
         if (header == null) {
             return null;
         }
-        HeaderElement[] headerElements = header.getElements();
+        final HeaderElement[] headerElements = header.getElements();
         if (headerElements.length > 0) {
-            HeaderElement headerElement = headerElements[0];
+            final HeaderElement headerElement = headerElements[0];
             if ("attachment".equalsIgnoreCase(headerElement.getName())) {
-                NameValuePair pair = headerElement.getParameterByName("filename");
+                final NameValuePair pair = headerElement.getParameterByName("filename");
                 if (pair != null) {
                     return pair.getValue();
                 }
@@ -150,7 +149,7 @@ public class RulepackResolver {
      * @return true if file is a ZIP archive, false if not
      */
     private boolean isArchive(File file) {
-        String filename = FilenameUtils.getName(file.getAbsolutePath());
+        final String filename = FilenameUtils.getName(file.getAbsolutePath());
         return FilenameUtils.isExtension(filename, "zip");
     }
 
@@ -166,7 +165,7 @@ public class RulepackResolver {
         }
         try {
             logger.log("Extracting rulepack archive");
-            File extractedDir = new File(file.getParentFile().getAbsolutePath());
+            final File extractedDir = new File(file.getParentFile().getAbsolutePath());
             ArchiveUtil.unzip(extractedDir, file);
             return extractedDir;
         } catch (FileNotFoundException e) {
@@ -184,7 +183,7 @@ public class RulepackResolver {
     }
 
     public void setTempDir(String directory) {
-        File file = new File(directory);
+        final File file = new File(directory);
         if (!file.exists()) {
             file.mkdirs();
         }

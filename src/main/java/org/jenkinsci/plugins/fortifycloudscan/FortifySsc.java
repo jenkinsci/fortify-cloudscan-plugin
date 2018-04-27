@@ -50,12 +50,12 @@ public class FortifySsc {
     public List<Project> getProjects() throws SOAPException, IOException, XmlException, NoSuchFieldException,
             IllegalAccessException, FortifySscClientException {
 
-        ProjectListRequestDocument requestDocument = ProjectListRequestDocument.Factory.newInstance();
+        final ProjectListRequestDocument requestDocument = ProjectListRequestDocument.Factory.newInstance();
         requestDocument.addNewProjectListRequest();
-        SOAPMessage soapRequest = client.createSoapMessage(requestDocument);
-        SOAPMessage soapResponse = client.callEndpoint(soapRequest);
-        ProjectListResponseDocument responseDocument = client.parseMessage(soapResponse, ProjectListResponseDocument.class);
-        ProjectListResponseDocument.ProjectListResponse projectList = responseDocument.getProjectListResponse();
+        final SOAPMessage soapRequest = client.createSoapMessage(requestDocument);
+        final SOAPMessage soapResponse = client.callEndpoint(soapRequest);
+        final ProjectListResponseDocument responseDocument = client.parseMessage(soapResponse, ProjectListResponseDocument.class);
+        final ProjectListResponseDocument.ProjectListResponse projectList = responseDocument.getProjectListResponse();
         return Arrays.asList(projectList.getProjectArray());
     }
 
@@ -70,14 +70,14 @@ public class FortifySsc {
         iterates through them and matches the specified project id. There should be a SOAP call that makes
         SSC do the hard work for us.
          */
-        List<ProjectVersionLite> projectVersions = new ArrayList<ProjectVersionLite>();
-        ActiveProjectVersionListRequestDocument requestDocument = ActiveProjectVersionListRequestDocument.Factory.newInstance();
+        final List<ProjectVersionLite> projectVersions = new ArrayList<ProjectVersionLite>();
+        final ActiveProjectVersionListRequestDocument requestDocument = ActiveProjectVersionListRequestDocument.Factory.newInstance();
         requestDocument.addNewActiveProjectVersionListRequest();
-        SOAPMessage soapRequest = client.createSoapMessage(requestDocument);
-        SOAPMessage soapResponse = client.callEndpoint(soapRequest);
-        ActiveProjectVersionListResponseDocument responseDocument = client.parseMessage(soapResponse, ActiveProjectVersionListResponseDocument.class);
-        ActiveProjectVersionListResponseDocument.ActiveProjectVersionListResponse activeProjectVersions = responseDocument.getActiveProjectVersionListResponse();
-        List<ProjectVersionLite> plist = Arrays.asList(activeProjectVersions.getProjectVersionArray());
+        final SOAPMessage soapRequest = client.createSoapMessage(requestDocument);
+        final SOAPMessage soapResponse = client.callEndpoint(soapRequest);
+        final ActiveProjectVersionListResponseDocument responseDocument = client.parseMessage(soapResponse, ActiveProjectVersionListResponseDocument.class);
+        final ActiveProjectVersionListResponseDocument.ActiveProjectVersionListResponse activeProjectVersions = responseDocument.getActiveProjectVersionListResponse();
+        final List<ProjectVersionLite> plist = Arrays.asList(activeProjectVersions.getProjectVersionArray());
         for (ProjectVersionLite projectVersion: plist) {
            if (projectVersion.getProjectId() == projectId) {
                projectVersions.add(projectVersion);

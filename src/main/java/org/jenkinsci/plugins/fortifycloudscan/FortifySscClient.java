@@ -83,14 +83,14 @@ public class FortifySscClient {
      * @throws SOAPException
      */
     public SOAPMessage createSoapMessage(XmlObject xmlObject) throws SOAPException {
-        MessageFactory msgFactory = MessageFactory.newInstance();
+        final MessageFactory msgFactory = MessageFactory.newInstance();
 
-        SOAPMessage soapMessage = msgFactory.createMessage();
-        SOAPPart prt = soapMessage.getSOAPPart();
-        SOAPEnvelope env = prt.getEnvelope();
+        final SOAPMessage soapMessage = msgFactory.createMessage();
+        final SOAPPart prt = soapMessage.getSOAPPart();
+        final SOAPEnvelope env = prt.getEnvelope();
         addWssHeader(env);
-        SOAPBody soapBody = env.getBody();
-        org.w3c.dom.Node node = xmlObject.getDomNode();
+        final SOAPBody soapBody = env.getBody();
+        final org.w3c.dom.Node node = xmlObject.getDomNode();
         soapBody.addDocument((Document) node);
         return soapMessage;
     }
@@ -102,7 +102,7 @@ public class FortifySscClient {
      * @throws SOAPException
      */
     private void addWssHeader(SOAPEnvelope envelope) throws SOAPException {
-        SOAPHeader header;
+        final SOAPHeader header;
         if (envelope.getHeader() == null)
             header = envelope.addHeader();
         else
@@ -113,18 +113,18 @@ public class FortifySscClient {
             header.addAttribute(new QName("axis2ns2:token"), sscToken);
         }
 
-        SOAPElement security = header.addChildElement("Security", "wsse", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd");
+        final SOAPElement security = header.addChildElement("Security", "wsse", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd");
 
-        SOAPElement usernameToken = security.addChildElement("UsernameToken", "wsse");
+        final SOAPElement usernameToken = security.addChildElement("UsernameToken", "wsse");
         usernameToken.addAttribute(new QName("xmlns:wsu"), "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd");
 
         if (sscUsername != null) {
-            SOAPElement username = usernameToken.addChildElement("Username", "wsse");
+            final SOAPElement username = usernameToken.addChildElement("Username", "wsse");
             username.addTextNode(sscUsername);
         }
 
         if (sscPassword != null) {
-            SOAPElement password = usernameToken.addChildElement("Password", "wsse");
+            final SOAPElement password = usernameToken.addChildElement("Password", "wsse");
             password.setAttribute("Type", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText");
             password.addTextNode(sscPassword);
         }
@@ -138,10 +138,9 @@ public class FortifySscClient {
      * @throws IOException
      */
     public SOAPMessage callEndpoint(SOAPMessage soapMessage) throws SOAPException, IOException {
-        SOAPConnectionFactory fact;
-        fact = SOAPConnectionFactory.newInstance();
-        SOAPConnection con = fact.createConnection();
-        SOAPMessage response = con.call(soapMessage, endpointUrl);
+        final SOAPConnectionFactory fact = SOAPConnectionFactory.newInstance();
+        final SOAPConnection con = fact.createConnection();
+        final SOAPMessage response = con.call(soapMessage, endpointUrl);
         con.close();
         return response;
     }
@@ -156,14 +155,14 @@ public class FortifySscClient {
     public <T> T parseMessage(SOAPMessage soapMessage, Class<T> clazz)
             throws SOAPException, XmlException, NoSuchFieldException, IllegalAccessException, FortifySscClientException {
 
-        XmlObject b = XmlObject.Factory.parse(soapMessage.getSOAPBody().getFirstChild());
-        Field typeField = clazz.getDeclaredField("type");
-        org.apache.xmlbeans.SchemaType schemaType = (org.apache.xmlbeans.SchemaType)typeField.get(null);
-        SOAPFault fault = soapMessage.getSOAPBody().getFault();
+        final XmlObject b = XmlObject.Factory.parse(soapMessage.getSOAPBody().getFirstChild());
+        final Field typeField = clazz.getDeclaredField("type");
+        final org.apache.xmlbeans.SchemaType schemaType = (org.apache.xmlbeans.SchemaType)typeField.get(null);
+        final SOAPFault fault = soapMessage.getSOAPBody().getFault();
         if (fault != null) {
             throw new FortifySscClientException(fault.getFaultString());
         }
-        XmlObject c = org.apache.xmlbeans.XmlBeans.getContextTypeLoader().parse(b.getDomNode(), schemaType, null);
+        final XmlObject c = org.apache.xmlbeans.XmlBeans.getContextTypeLoader().parse(b.getDomNode(), schemaType, null);
         return clazz.cast(c);
     }
 

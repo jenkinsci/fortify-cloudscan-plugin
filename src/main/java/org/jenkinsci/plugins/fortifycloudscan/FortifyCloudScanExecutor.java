@@ -52,14 +52,14 @@ public class FortifyCloudScanExecutor implements Serializable {
      */
     public String prepare() {
         // Generate a list of Strings representing the entire command to execute
-        ArrayList<String> mergedCommand = new ArrayList<String>();
+        final ArrayList<String> mergedCommand = new ArrayList<String>();
         mergedCommand.add(options.getCommand());
         mergedCommand.addAll(options.getArgs());
         mergedCommand.addAll(processRules(options.getRules(), options.getWorkspace()));
         mergedCommand.addAll(options.getScanOpts());
 
         // Convert/cast to a String[] so that it can be logged and executed
-        String[] command = mergedCommand.toArray(new String[mergedCommand.size()]);
+        final String[] command = mergedCommand.toArray(new String[mergedCommand.size()]);
         return CommandUtil.generateShellCommand(command);
     }
 
@@ -69,12 +69,12 @@ public class FortifyCloudScanExecutor implements Serializable {
      * @return the command arguments containing resolved rulepack locations
      */
     private List<String> processRules(List<String> rules, String workspace) {
-        List<String> command = new ArrayList<String>();
-        RulepackResolver resolver = new RulepackResolver(logger);
+        final List<String> command = new ArrayList<String>();
+        final RulepackResolver resolver = new RulepackResolver(logger);
         //todo: need to make this configurable for workspace or any other user-defined directory
         //resolver.setTempDir(workspace);
         for (String rule : rules) {
-            File file = resolver.resolve(rule);
+            final File file = resolver.resolve(rule);
             if (file != null) {
                 CommandUtil.append(command, file.getAbsolutePath(), "-rules");
             }

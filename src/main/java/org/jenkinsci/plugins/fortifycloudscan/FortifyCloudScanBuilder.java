@@ -597,7 +597,7 @@ public class FortifyCloudScanBuilder extends Builder implements SimpleBuildStep,
             }
             try {
                 FortifySsc ssc = new FortifySsc(new URL(this.sscUrl + "/fm-ws/services"), this.globalSscToken);
-                List<ProjectVersionLite> projectVersions = ssc.getActiveProjectVersions(Long.valueOf(project));
+                List<ProjectVersionLite> projectVersions = ssc.getActiveProjectVersions(Long.parseLong(project));
                 m.add("---- " + Messages.select() + " ---- ", "");
                 for (ProjectVersionLite projectVersion : projectVersions) {
                     m.add(projectVersion.getName(), String.valueOf(projectVersion.getId()));

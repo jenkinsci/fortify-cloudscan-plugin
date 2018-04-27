@@ -17,7 +17,6 @@ package org.jenkinsci.plugins.fortifycloudscan.util;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
-
 import java.util.List;
 
 public class CommandUtil {
@@ -58,7 +57,7 @@ public class CommandUtil {
     }
 
     public static String toString(String[] stringArray) {
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         for (String string : stringArray) {
             sb.append(string).append(" ");
         }
@@ -66,7 +65,7 @@ public class CommandUtil {
     }
 
     public static String generateShellCommand(String[] command) {
-        String shellCommand;
+        final String shellCommand;
         if (SystemUtils.IS_OS_WINDOWS) {
             shellCommand = "cmd /c " + CommandUtil.toString(command);
         } else {

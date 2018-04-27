@@ -15,8 +15,6 @@
  */
 package org.jenkinsci.plugins.fortifycloudscan.util;
 
-import org.apache.commons.io.IOUtils;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -30,17 +28,15 @@ public class ArchiveUtil {
     private ArchiveUtil() {}
 
 
-    public static void unzip(File directory, File zipFile) throws FileNotFoundException, IOException {
+    public static void unzip(File directory, File zipFile) throws IOException {
         if(!directory.exists()) {
             directory.mkdirs();
         }
         byte[] buffer = new byte[2048];
 
-        FileInputStream fInput = null;
-        ZipInputStream zipInput = null;
-        try {
-            fInput = new FileInputStream(zipFile);
-            zipInput = new ZipInputStream(fInput);
+        try (final FileInputStream fInput = new FileInputStream(zipFile);
+             final ZipInputStream zipInput = new ZipInputStream(fInput)) {
+
             ZipEntry entry = zipInput.getNextEntry();
             while (entry != null) {
                 String entryName = entry.getName();
@@ -54,27 +50,19 @@ public class ArchiveUtil {
                     if (!file.getParentFile().isDirectory() && !file.getParentFile().exists()) {
                         file.getParentFile().mkdirs();
                     }
-                    FileOutputStream fOutput = new FileOutputStream(file);
-                    int count;
-                    while ((count = zipInput.read(buffer)) > 0) {
-                        fOutput.write(buffer, 0, count);
+                    try (FileOutputStream fOutput = new FileOutputStream(file)) {
+                        int count;
+                        while ((count = zipInput.read(buffer)) > 0) {
+                            fOutput.write(buffer, 0, count);
+                        }
                     }
-                    fOutput.close();
                 }
                 zipInput.closeEntry();
                 entry = zipInput.getNextEntry();
             }
             zipInput.closeEntry();
-            zipInput.close();
-            fInput.close();
-        } catch (FileNotFoundException e) {
-            throw new FileNotFoundException(e.getMessage());
         } catch (IOException e) {
             throw new IOException(e);
-        } finally {
-            try { zipInput.closeEntry(); } catch (IOException e) {}
-            IOUtils.closeQuietly(zipInput);
-            IOUtils.closeQuietly(fInput);
         }
     }
 
