@@ -38,7 +38,7 @@ import java.util.UUID;
 @SuppressFBWarnings(value = "RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
 public class RulepackResolver {
 
-    private ConsoleLogger logger;
+    private transient ConsoleLogger logger;
     private String tempDir;
 
     public RulepackResolver(ConsoleLogger logger) {

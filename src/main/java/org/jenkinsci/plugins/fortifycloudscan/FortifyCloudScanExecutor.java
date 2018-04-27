@@ -32,7 +32,7 @@ public class FortifyCloudScanExecutor implements Serializable {
 
     private static final long serialVersionUID = 3595913479313812273L;
 
-    private final ConsoleLogger logger;
+    private transient final ConsoleLogger logger;
     private final Options options;
 
     /**
