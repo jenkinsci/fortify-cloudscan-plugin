@@ -1,5 +1,3 @@
-[![Build Status](https://jenkins.ci.cloudbees.com/buildStatus/icon?job=plugins/fortify-cloudscan-plugin)](https://jenkins.ci.cloudbees.com/job/plugins/job/fortify-cloudscan-plugin/)
-
 Fortify CloudScan Jenkins Plugin
 ==============================
 
@@ -19,6 +17,5 @@ Fortify and Fortify CloudScan are Copyright (c) Micro Focus All Rights Reserved.
 
 Permission to modify and redistribute is granted under the terms of the Apache 2.0 license. See the [LICENSE.txt] [license] file for the full license.
 
-  [license]: https://github.com/jenkinsci/dependency-check-plugin/blob/master/LICENSE.txt
-  [notices]: https://github.com/jenkinsci/dependency-check-plugin/blob/master/NOTICES.txt
+  [license]: https://github.com/jenkinsci/fortify-cloudscan-plugin/blob/master/LICENSE.txt
   [wiki]: https://wiki.jenkins-ci.org/display/JENKINS/Fortify+CloudScan+Plugin
