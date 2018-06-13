@@ -459,7 +459,7 @@ public class FortifyCloudScanBuilder extends Builder implements SimpleBuildStep,
         /**
          * Precompiled RegEx validation patterns
          */
-        private static final Pattern PATTERN_VERSION_ID = Pattern.compile("^[0-9]{5}?$");
+        private static final Pattern PATTERN_VERSION_ID = Pattern.compile("^[0-9]+$"); // Older versions of SSC has 5 digit project ID's, newer SSC versions start at 1
         private static final Pattern PATTERN_UUID = Pattern.compile("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$");
         private static final Pattern PATTERN_MEMORY = Pattern.compile("^[0-9]*(g|G|m|M)$");
 

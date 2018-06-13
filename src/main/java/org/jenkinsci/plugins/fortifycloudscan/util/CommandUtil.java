@@ -74,4 +74,8 @@ public class CommandUtil {
         return shellCommand;
     }
 
+    public static String filter(String s) {
+        return s.replace("|", "").replace("&", "").replace(";", "");
+    }
+
 }
