@@ -44,6 +44,13 @@ public class ArchiveUtil {
             while (entry != null) {
                 String entryName = entry.getName();
                 File file = new File(directory.getAbsolutePath() + File.separator + entryName);
+
+                // Validate against potentially malicious zip payload
+                // https://vulncat.fortify.com/en/detail?id=desc.controlflow.java.path_manipulation_zip_entry_overwrite
+                if (!file.getCanonicalPath().startsWith(directory.getCanonicalPath())) {
+                    throw new IOException("The archive contains an entry that would be extracted outside of the target directory.");
+                }
+
                 if (entry.isDirectory()) {
                     File newDir = new File(file.getAbsolutePath());
                     if (!newDir.exists()) {
