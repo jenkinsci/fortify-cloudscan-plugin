@@ -1,3 +1,5 @@
+[![Build Status](https://ci.jenkins.io/buildStatus/icon?job=Plugins/fortify-cloudscan-plugin/master)](https://ci.jenkins.io/job/Plugins/job/fortify-cloudscan-plugin)
+
 Fortify CloudScan Jenkins Plugin
 ==============================
 
