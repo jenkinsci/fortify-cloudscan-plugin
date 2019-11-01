@@ -68,6 +68,9 @@ limitations under the License.
     </f:optionalBlock>
 
     <f:advanced>
+        <f:entry title="${%sensorPool}" field="sensorPool" help="/plugin/fortify-cloudscan-jenkins-plugin/help-sensor-pool.html">
+            <f:textbox id="sensorPool"/>
+        </f:entry>
         <f:entry title="${%filter}" field="filter" help="/plugin/fortify-cloudscan-jenkins-plugin/help-filter.html">
             <f:textbox id="filter"/>
         </f:entry>

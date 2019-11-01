@@ -82,6 +82,7 @@ public class FortifyCloudScanBuilder extends Builder implements SimpleBuildStep,
     private final boolean quick;
     private final String rules;
     private final boolean useParallelAnalysis;
+    private final String sensorPool;
 
 
     @DataBoundConstructor // Fields in config.jelly must match the parameter names
@@ -89,7 +90,7 @@ public class FortifyCloudScanBuilder extends Builder implements SimpleBuildStep,
                                    String buildLabel, String buildProject, String buildVersion, Boolean useSsc,
                                    String sscToken, String upToken, String versionId, String scanArgs, String filter,
                                    Boolean noDefaultRules, Boolean disableSourceRendering, Boolean disableSnippets,
-                                   Boolean quick, String rules, Boolean useParallelAnalysis) {
+                                   Boolean quick, String rules, Boolean useParallelAnalysis, String sensorPool) {
 
         this.buildId = buildId;
         this.useAutoHeap = (useAutoHeap != null) && !useAutoHeap; // This value comes in negated
@@ -115,6 +116,7 @@ public class FortifyCloudScanBuilder extends Builder implements SimpleBuildStep,
         this.quick = (quick != null) && quick;
         this.rules = rules;
         this.useParallelAnalysis = (useParallelAnalysis != null) && useParallelAnalysis;
+        this.sensorPool = sensorPool;
     }
 
     /**
@@ -270,6 +272,14 @@ public class FortifyCloudScanBuilder extends Builder implements SimpleBuildStep,
     }
 
     /**
+     * Retrieves value of sensorPool. This is a per-build config item.
+     * This method must match the value in <tt>config.jelly</tt>.
+     */
+    public String getSensorPool() {
+        return sensorPool;
+    }
+
+    /**
      * This method is called whenever the build step is executed.
      *
      * @param build    A Run object
@@ -366,6 +376,7 @@ public class FortifyCloudScanBuilder extends Builder implements SimpleBuildStep,
         /* Populate CloudScan START command */
         CommandUtil.append(args, substituteVariable(build, listener, buildId), "-b");
         CommandUtil.append(args, substituteVariable(build, listener, filter), "-filter");
+        CommandUtil.append(args, substituteVariable(build, listener, sensorPool), "-pool");
 
         return args;
     }
